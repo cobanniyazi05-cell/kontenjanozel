@@ -141,6 +141,38 @@
       </div>
     </header>
 
+    <!-- İLÇE GENELİ KADEME BAZLI ÖZET VE İSTATİSTİK PANELİ -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+      <div style="background: #ffffff; border: 1px solid var(--border); border-left: 4px solid #ec4899; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #9d174d; text-transform: uppercase;">🎈 Okul Öncesi Kademesi</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+          <div><span style="font-size: 1.35rem; font-weight: 800; color: #0f172a;" id="statPreStudent">0</span> <span style="font-size: 0.75rem; color: #64748b;">Öğrenci</span></div>
+          <div><span style="font-size: 1.2rem; font-weight: 800; color: #16a34a;" id="statPreEmpty">0</span> <span style="font-size: 0.75rem; color: #64748b;">Boş Kont.</span></div>
+        </div>
+      </div>
+      <div style="background: #ffffff; border: 1px solid var(--border); border-left: 4px solid #3b82f6; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase;">🎒 İlkokul Kademesi</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+          <div><span style="font-size: 1.35rem; font-weight: 800; color: #0f172a;" id="statPriStudent">0</span> <span style="font-size: 0.75rem; color: #64748b;">Öğrenci</span></div>
+          <div><span style="font-size: 1.2rem; font-weight: 800; color: #16a34a;" id="statPriEmpty">0</span> <span style="font-size: 0.75rem; color: #64748b;">Boş Kont.</span></div>
+        </div>
+      </div>
+      <div style="background: #ffffff; border: 1px solid var(--border); border-left: 4px solid #f59e0b; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #b45309; text-transform: uppercase;">📚 Ortaokul Kademesi</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+          <div><span style="font-size: 1.35rem; font-weight: 800; color: #0f172a;" id="statMidStudent">0</span> <span style="font-size: 0.75rem; color: #64748b;">Öğrenci</span></div>
+          <div><span style="font-size: 1.2rem; font-weight: 800; color: #16a34a;" id="statMidEmpty">0</span> <span style="font-size: 0.75rem; color: #64748b;">Boş Kont.</span></div>
+        </div>
+      </div>
+      <div style="background: #1e3a8a; color: #ffffff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 5px rgba(30,58,138,0.2);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #93c5fd; text-transform: uppercase;">🏛️ İlçe Genel Toplamı</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+          <div><span style="font-size: 1.35rem; font-weight: 800;" id="statTotalStudent">0</span> <span style="font-size: 0.75rem; color: #bfdbfe;">Kayıtlı</span></div>
+          <div><span style="font-size: 1.2rem; font-weight: 800; color: #4ade80;" id="statTotalEmpty">0</span> <span style="font-size: 0.75rem; color: #bfdbfe;">Toplam Boş</span></div>
+        </div>
+      </div>
+    </div>
+
     <!-- BÖLÜM A: ÖĞRENCİ YÖNLENDİRME & AKILLI ADRESE GÖRE YAKIN OKUL BULMA -->
     <div class="panel" style="border: 2px solid #c4b5fd; background: #faf5ff;">
       <div class="panel-title" style="color: #6b21a8;">
@@ -151,11 +183,19 @@
           <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Öğrenci Adı Soyadı</label>
           <input type="text" id="studentName" placeholder="Örn: Ali Yılmaz" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
         </div>
-        <div style="flex: 1.2;">
+        <div style="flex: 1.1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Tanılama Türü</label>
           <select id="studentDiag" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
             <option value="Hafif Düzey-Zihinsel">Hafif Düzey - Zihinsel</option>
             <option value="Hafif Düzey-Otizm">Hafif Düzey - Otizm</option>
+          </select>
+        </div>
+        <div style="flex: 1.1;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Öğrenci Kademesi</label>
+          <select id="studentLevel" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+            <option value="İlkokul">İlkokul</option>
+            <option value="Ortaokul">Ortaokul</option>
+            <option value="Okul Öncesi">Okul Öncesi</option>
           </select>
         </div>
         <div style="flex: 1.2;">
@@ -209,7 +249,15 @@
           <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Okul Adı</label>
           <input type="text" id="newSchoolName" placeholder="Örn: Beylikdüzü İlkokulu" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
         </div>
-        <div style="flex: 1.2;">
+        <div style="flex: 1.1;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Okul Kademesi</label>
+          <select id="newSchoolLevel" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+            <option value="İlkokul">İlkokul</option>
+            <option value="Ortaokul">Ortaokul</option>
+            <option value="Okul Öncesi">Okul Öncesi</option>
+          </select>
+        </div>
+        <div style="flex: 1.1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Sınıf Türü</label>
           <select id="newClassType" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
             <option value="Hafif Düzey-Zihinsel">Hafif Düzey-Zihinsel (Maks 10)</option>
@@ -253,9 +301,10 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 24%;">Okul Adı</th>
-              <th style="width: 22%;">Okul Adresi</th>
-              <th style="width: 9%;">Şube</th>
+              <th style="width: 20%;">Okul Adı</th>
+              <th style="width: 10%;">Kademe</th>
+              <th style="width: 20%;">Okul Adresi</th>
+              <th style="width: 8%;">Şube</th>
               <th style="width: 8%;">Kapasite</th>
               <th style="width: 8%;">Mevcut</th>
               <th style="width: 13%;">Kalan Boş</th>
@@ -278,9 +327,10 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 24%;">Okul Adı</th>
-              <th style="width: 22%;">Okul Adresi</th>
-              <th style="width: 9%;">Şube</th>
+              <th style="width: 20%;">Okul Adı</th>
+              <th style="width: 10%;">Kademe</th>
+              <th style="width: 20%;">Okul Adresi</th>
+              <th style="width: 8%;">Şube</th>
               <th style="width: 8%;">Kapasite</th>
               <th style="width: 8%;">Mevcut</th>
               <th style="width: 13%;">Kalan Boş</th>
@@ -302,6 +352,14 @@
       <div class="form-group">
         <label>Okul Adı</label>
         <input type="text" id="editSchoolName">
+      </div>
+      <div class="form-group">
+        <label>Okul Kademesi</label>
+        <select id="editSchoolLevel">
+          <option value="İlkokul">İlkokul</option>
+          <option value="Ortaokul">Ortaokul</option>
+          <option value="Okul Öncesi">Okul Öncesi</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Mahalle</label>
@@ -1004,6 +1062,7 @@
 
     function addClass() {
       const name = document.getElementById('newSchoolName').value.trim();
+      const level = document.getElementById('newSchoolLevel').value;
       const type = document.getElementById('newClassType').value;
       const neighborhood = document.getElementById('schoolNeighborhood').value;
       let street = document.getElementById('schoolStreet').value;
@@ -1022,6 +1081,7 @@
       classes.push({
         id: Date.now(),
         school: name,
+        level: level,
         type: type,
         neighborhood: neighborhood,
         street: street,
@@ -1063,6 +1123,7 @@
       if (!c) return;
       document.getElementById('editClassId').value = id;
       document.getElementById('editSchoolName').value = c.school;
+      document.getElementById('editSchoolLevel').value = c.level || 'İlkokul';
       document.getElementById('editSchoolNeighborhood').value = c.neighborhood || Object.keys(BEYLIKDUZU_DATA)[0];
       updateStreetSelect('editSchoolNeighborhood', 'editSchoolStreet');
       const editSel = document.getElementById('editSchoolStreet');
@@ -1086,6 +1147,7 @@
     function saveEditedSchool() {
       const id = parseInt(document.getElementById('editClassId').value);
       const name = document.getElementById('editSchoolName').value.trim();
+      const level = document.getElementById('editSchoolLevel').value;
       const neighborhood = document.getElementById('editSchoolNeighborhood').value;
       let street = document.getElementById('editSchoolStreet').value;
       const streetCustom = document.getElementById('editSchoolStreetCustom').value.trim();
@@ -1099,6 +1161,7 @@
       const c = classes.find(item => item.id === id);
       if (c) {
         c.school = name;
+        c.level = level;
         c.neighborhood = neighborhood;
         c.street = street;
         c.buildingName = buildingName;
@@ -1108,13 +1171,53 @@
       closeEditModal();
     }
 
-    // AKILLI ÖĞRENCİ YERLEŞTİRME VE EN YAKIN OKUL BULMA
-    let pendingPlacementClassId = null;
-    let pendingStudentName = "";
+    // İSTATİSTİK / ÖZET HESAPLAMA
+    function updateDistrictSummary() {
+      let stats = {
+        pre: { student: 0, cap: 0 },
+        pri: { student: 0, cap: 0 },
+        mid: { student: 0, cap: 0 },
+        tot: { student: 0, cap: 0 }
+      };
+
+      classes.forEach(c => {
+        const lvl = c.level || 'İlkokul';
+        const st = c.currentStudents || 0;
+        const cap = c.maxCapacity || 0;
+
+        if (lvl === 'Okul Öncesi') {
+          stats.pre.student += st;
+          stats.pre.cap += cap;
+        } else if (lvl === 'Ortaokul') {
+          stats.mid.student += st;
+          stats.mid.cap += cap;
+        } else {
+          stats.pri.student += st;
+          stats.pri.cap += cap;
+        }
+
+        stats.tot.student += st;
+        stats.tot.cap += cap;
+      });
+
+      const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+      setEl('statPreStudent', stats.pre.student);
+      setEl('statPreEmpty', Math.max(0, stats.pre.cap - stats.pre.student));
+      setEl('statPriStudent', stats.pri.student);
+      setEl('statPriEmpty', Math.max(0, stats.pri.cap - stats.pri.student));
+      setEl('statMidStudent', stats.mid.student);
+      setEl('statMidEmpty', Math.max(0, stats.mid.cap - stats.mid.student));
+      setEl('statTotalStudent', stats.tot.student);
+      setEl('statTotalEmpty', Math.max(0, stats.tot.cap - stats.tot.student));
+    }
+
+    // AKILLI ÖĞRENCİ YERLEŞTİRME VE İKİ TEKLİF SUNMA ALGORİTMASI
+    let currentPendingStudent = null;
 
     function findClosestSchool() {
       const sName = document.getElementById('studentName').value.trim();
       const sDiag = document.getElementById('studentDiag').value;
+      const sLevel = document.getElementById('studentLevel').value;
       const sNeigh = document.getElementById('studentNeighborhood').value;
       let sStreet = document.getElementById('studentStreet').value;
       const sStreetCustom = document.getElementById('studentStreetCustom').value.trim();
@@ -1131,61 +1234,122 @@
         return;
       }
 
-      // Sadece aynı tanılama türündeki ve kontenjanı müsait (>0) okulları filtrele
-      const availableClasses = classes.filter(c => c.type === sDiag && (c.maxCapacity - c.currentStudents) > 0);
+      currentPendingStudent = {
+        name: sName,
+        diag: sDiag,
+        level: sLevel,
+        address: `${sNeigh}, ${sStreet || ''}` + (sBName ? `, ${sBName}` : '') + (sBNo ? ` No:${sBNo}` : '')
+      };
 
-      if (availableClasses.length === 0) {
+      // FİLTRELEME KRİTERLERİ:
+      // 1. Tanı türü eşleşmeli (Hafif Zihinsel / Hafif Otizm)
+      // 2. Kademe eşleşmeli (Okul Öncesi / İlkokul / Ortaokul)
+      // 3. Boş kontenjanı olmalı (> 0)
+      const eligibleClasses = classes.filter(c => {
+        const cLevel = c.level || 'İlkokul';
+        const empty = (c.maxCapacity - c.currentStudents);
+        return c.type === sDiag && cLevel === sLevel && empty > 0;
+      });
+
+      if (eligibleClasses.length === 0) {
         resBox.style.display = 'block';
         resBox.style.background = '#fef2f2';
         resBox.style.borderColor = '#fca5a5';
         resDetails.innerHTML = `
-          <strong style="color:#b91c1c;">Üzgünüz, ilçede ${sDiag} alanında boş kontenjanı olan açık sınıf bulunamadı!</strong><br>
-          Lütfen okullarda yeni şube açmayı değerlendiriniz.
+          <div style="color:#b91c1c; font-weight:700; font-size:1rem; margin-bottom:6px;">⚠️ Uygun Boş Kontenjan Bulunamadı!</div>
+          <div style="font-size:0.9rem; color:#334155;">
+            <strong>Aranan Kriterler:</strong> ${sLevel} Kademesi | ${sDiag}<br>
+            İlçemizde bu kademe ve tanı alanında şu anda boş kontenjanı olan açık sınıf bulunmamaktadır. Lütfen yeni şube açılması durumunu değerlendiriniz.
+          </div>
         `;
-        document.querySelector('.match-actions').style.display = 'none';
+        const actBox = document.querySelector('.match-actions');
+        if (actBox) actBox.style.display = 'none';
         return;
       }
 
-      // Mesafeye göre hesapla ve sırala
-      const sorted = availableClasses.map(c => {
+      // Mesafeye göre en yakından en uzağa sırala
+      const sorted = eligibleClasses.map(c => {
         const dist = calculateDistance(sNeigh, c.neighborhood || sNeigh);
         return { ...c, distanceKm: dist };
       }).sort((a, b) => a.distanceKm - b.distanceKm);
 
-      const best = sorted[0];
-      pendingPlacementClassId = best.id;
-      pendingStudentName = sName;
-
-      const remaining = best.maxCapacity - best.currentStudents;
-      const distText = best.neighborhood === sNeigh ? `Aynı Mahallede (~${best.distanceKm.toFixed(1)} km)` : `Yaklaşık ~${best.distanceKm.toFixed(1)} km mesafede`;
+      // İki Teklif: 1. En yakın, 2. İkinci en yakın
+      const offer1 = sorted[0];
+      const offer2 = sorted.length > 1 ? sorted[1] : null;
 
       resBox.style.display = 'block';
-      resBox.style.background = '#f0fdf4';
-      resBox.style.borderColor = '#86efac';
-      document.querySelector('.match-actions').style.display = 'flex';
+      resBox.style.background = '#f8fafc';
+      resBox.style.borderColor = '#a855f7';
+      const actBox = document.querySelector('.match-actions');
+      if (actBox) actBox.style.display = 'none';
 
-      const sAddrFull = `${sNeigh}, ${sStreet}` + (sBName ? `, ${sBName}` : '') + (sBNo ? ` No:${sBNo}` : '');
-      const oAddrFull = (best.neighborhood || 'Belirtilmemiş') + (best.street ? `, ${best.street}` : '') + (best.buildingName ? `, ${best.buildingName}` : '') + (best.buildingNo ? ` No:${best.buildingNo}` : '');
+      const buildOfferCard = (offer, index, isBest) => {
+        const rem = offer.maxCapacity - offer.currentStudents;
+        const dText = offer.neighborhood === sNeigh ? `Aynı Mahallede (~${offer.distanceKm.toFixed(1)} km)` : `Yaklaşık ~${offer.distanceKm.toFixed(1)} km`;
+        let extraAddr = [];
+        if (offer.street) extraAddr.push(offer.street);
+        if (offer.buildingName) extraAddr.push(offer.buildingName);
+        if (offer.buildingNo) extraAddr.push('No:' + offer.buildingNo);
+        const fullAddr = (offer.neighborhood || 'Beylikdüzü') + (extraAddr.length ? ', ' + extraAddr.join(', ') : '');
 
-      resDetails.innerHTML = `
-        <strong>Öğrenci:</strong> ${sName} (${sDiag})<br>
-        <strong>Öğrenci İkametgahı:</strong> ${sAddrFull}<br>
-        <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-        <span style="font-size: 1.05rem; color: #166534;">🏆 <strong>Önerilen En Yakın Okul:</strong> ${best.school} (${best.branch})</span><br>
-        <strong>Okul Açık Adresi:</strong> ${oAddrFull}<br>
-        <strong>Mesafe Durumu:</strong> <span style="color:#2563eb; font-weight:600;">${distText}</span> | 
-        <strong>Kalan Boş Kontenjan:</strong> <span style="color:#16a34a; font-weight:700;">${remaining} Öğrenci</span><br><br>
-        <em>Bu öğrenciyi ilgili okula yönlendirip kontenjandan bir düşüş sağlamak istiyor musunuz?</em>
+        return `
+          <div style="background:#ffffff; border:2px solid ${isBest ? '#22c55e' : '#3b82f6'}; border-radius:10px; padding:16px; margin-top:12px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+              <span style="font-weight:800; font-size:1.05rem; color:${isBest ? '#15803d' : '#1d4ed8'};">
+                ${index}. TEKLİF: ${offer.school} (${offer.branch})
+              </span>
+              <span style="background:${isBest ? '#dcfce7' : '#dbeafe'}; color:${isBest ? '#15803d' : '#1e40af'}; font-weight:700; font-size:0.8rem; padding:3px 10px; border-radius:12px;">
+                ${isBest ? '⭐ EN YAKIN OKUL' : '📍 ALTERNATİF EN YAKIN OKUL'}
+              </span>
+            </div>
+            <div style="font-size:0.88rem; color:#334155; line-height:1.6; margin-bottom:12px;">
+              <strong>Kademe:</strong> <span style="font-weight:700; color:#4338ca;">${offer.level || 'İlkokul'}</span> | 
+              <strong>Mesafe:</strong> <span style="font-weight:700; color:#0284c7;">${dText}</span> | 
+              <strong>Kalan Boş Kontenjan:</strong> <span style="font-weight:800; color:#16a34a;">${rem} Öğrenci</span><br>
+              <strong>Okul Açık Adresi:</strong> ${fullAddr}
+            </div>
+            <button type="button" onclick="confirmPlacementToClass(${offer.id})" style="background:${isBest ? '#16a34a' : '#2563eb'}; color:#ffffff; border:none; padding:10px 18px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; width:100%; transition:opacity 0.2s;">
+              👉 ${index}. Teklifi Seç: Öğrenciyi Bu Okula Yerleştir ve Kontenjandan Düş
+            </button>
+          </div>
+        `;
+      };
+
+      let htmlOffers = `
+        <div style="background:#f1f5f9; padding:10px 14px; border-radius:8px; margin-bottom:10px; font-size:0.9rem;">
+          <strong>Öğrenci:</strong> ${currentPendingStudent.name} | <strong>Kademe:</strong> ${currentPendingStudent.level} | <strong>Tanı:</strong> ${currentPendingStudent.diag}<br>
+          <strong>İkametgâh:</strong> ${currentPendingStudent.address}
+        </div>
       `;
+
+      htmlOffers += buildOfferCard(offer1, 1, true);
+
+      if (offer2) {
+        htmlOffers += buildOfferCard(offer2, 2, false);
+      } else {
+        htmlOffers += `
+          <div style="margin-top:10px; font-size:0.85rem; color:#64748b; font-style:italic; padding:6px 10px; background:#f8fafc; border-radius:6px; border:1px dashed #cbd5e1;">
+            ℹ️ İlçede kriterleri sağlayan başka boş kontenjanlı okul bulunmadığından tek teklif sunulmuştur.
+          </div>
+        `;
+      }
+
+      htmlOffers += `
+        <div style="text-align:right; margin-top:14px;">
+          <button type="button" class="btn-pass" onclick="document.getElementById('matchResult').style.display='none'">Pencereyi Kapat</button>
+        </div>
+      `;
+
+      resDetails.innerHTML = htmlOffers;
     }
 
-    function confirmStudentPlacement() {
-      if (!pendingPlacementClassId) return;
-      const target = classes.find(c => c.id === pendingPlacementClassId);
+    function confirmPlacementToClass(classId) {
+      if (!currentPendingStudent) return;
+      const target = classes.find(c => c.id === classId);
       if (target) {
         target.currentStudents += 1;
         saveData();
-        alert(`Tebrikler! ${pendingStudentName} öğrencisi ${target.school} (${target.branch}) bünyesine başarıyla yerleştirildi. Kalan kontenjan: ${target.maxCapacity - target.currentStudents}`);
+        alert(`İşlem Başarılı!\n\n${currentPendingStudent.name} öğrencisi ${target.school} (${target.level || 'İlkokul'} - ${target.branch}) bünyesine başarıyla yönlendirildi.\nSınıfta kalan boş kontenjan: ${target.maxCapacity - target.currentStudents}`);
         document.getElementById('matchResult').style.display = 'none';
         document.getElementById('studentName').value = '';
         document.getElementById('studentBuildingName').value = '';
@@ -1201,6 +1365,8 @@
       const oBody = document.getElementById('tableOtizmBody');
       if (!zBody || !oBody) return;
       zBody.innerHTML = ''; oBody.innerHTML = '';
+
+      updateDistrictSummary();
 
       const sorted = [...classes].sort((a,b) => a.school.localeCompare(b.school, 'tr'));
       const zList = sorted.filter(c => c.type === 'Hafif Düzey-Zihinsel');
@@ -1227,9 +1393,13 @@
         if (c.buildingNo) extraAddr.push('No:' + c.buildingNo);
         const addrText = c.neighborhood ? `<strong>${c.neighborhood}</strong><br><small style="color:#64748b;">${extraAddr.join(', ')}</small>` : '<span style="color:#94a3b8;">Adres girilmemiş</span>';
 
+        const levelBadgeColor = c.level === 'Okul Öncesi' ? '#fce7f3; color:#9d174d;' : (c.level === 'Ortaokul' ? '#fef3c7; color:#92400e;' : '#e0e7ff; color:#3730a3;');
+        const levelBadge = `<span style="background:${levelBadgeColor}; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:6px; display:inline-block;">${c.level || 'İlkokul'}</span>`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td data-label="Okul Adı"><strong>${c.school}</strong></td>
+          <td data-label="Kademe">${levelBadge}</td>
           <td data-label="Okul Adresi">${addrText}</td>
           <td data-label="Şube"><span>${c.branch}</span></td>
           <td data-label="Kapasite">${c.maxCapacity}</td>
