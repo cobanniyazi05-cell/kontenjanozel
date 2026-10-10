@@ -166,9 +166,10 @@
         </div>
         <div style="flex: 1.2;">
           <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Cadde / Sokak</label>
-          <select id="studentStreet" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+          <select id="studentStreet" onchange="checkCustomStreet('studentStreet', 'studentStreetCustom')" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
             <!-- Mahalle seçimine göre doldurulur -->
           </select>
+          <input type="text" id="studentStreetCustom" placeholder="✍️ Sokak / Cadde adını yazınız" style="display:none; width:100%; height:38px; margin-top:6px; padding:6px 10px; border:1px solid #9333ea; border-radius:6px; background:#fff; font-size:0.88rem;">
         </div>
         <div style="flex: 1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Bina / Site Adı</label>
@@ -223,9 +224,10 @@
         </div>
         <div style="flex: 1.2;">
           <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Cadde / Sokak</label>
-          <select id="schoolStreet" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+          <select id="schoolStreet" onchange="checkCustomStreet('schoolStreet', 'schoolStreetCustom')" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
             <!-- JS doldurur -->
           </select>
+          <input type="text" id="schoolStreetCustom" placeholder="✍️ Sokak / Cadde adını yazınız" style="display:none; width:100%; height:38px; margin-top:6px; padding:6px 10px; border:1px solid var(--primary); border-radius:6px; background:#fff; font-size:0.88rem;">
         </div>
         <div style="flex: 1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Bina / Kampüs Adı</label>
@@ -307,7 +309,8 @@
       </div>
       <div class="form-group">
         <label>Cadde / Sokak</label>
-        <select id="editSchoolStreet"></select>
+        <select id="editSchoolStreet" onchange="checkCustomStreet('editSchoolStreet', 'editSchoolStreetCustom')"></select>
+        <input type="text" id="editSchoolStreetCustom" placeholder="✍️ Sokak / Cadde adını yazınız" style="display:none; width:100%; height:38px; margin-top:6px; padding:6px 10px; border:1px solid var(--primary); border-radius:6px; background:#fff; font-size:0.88rem;">
       </div>
       <div class="form-group">
         <label>Bina / Kampüs Adı</label>
@@ -351,366 +354,403 @@
   <script>
     // BEYLİKDÜZÜ MAHALLELERİ VE ÖRNEK CADDE/SOKAK LİSTESİ
     const BEYLIKDUZU_DATA = {
+  "Büyükşehir Mah.": [
+    "19 Mayıs Caddesi",
+    "23 Nisan Caddesi",
+    "29 Ekim Caddesi",
+    "30 Ağustos Caddesi",
+    "Anafartalar Caddesi",
+    "Atatürk Bulvarı",
+    "Belediye Caddesi",
+    "Beylikdüzü Caddesi",
+    "Cumhuriyet Caddesi",
+    "Çamlık Caddesi",
+    "Çanakkale Caddesi",
+    "Demokrasi Caddesi",
+    "Dumlupınar Caddesi",
+    "Enver Adakan Caddesi",
+    "Fatih Caddesi",
+    "Gazi Caddesi",
+    "İsmet İnönü Caddesi",
+    "Koçman Caddesi",
+    "Sakarya Caddesi",
+    "Şehitler Caddesi",
+    "Zafer Caddesi",
+    "Adatepe Sokak",
+    "Akasya Sokak",
+    "Akdeniz Sokak",
+    "Ay Sokak",
+    "Aydınlık Sokak",
+    "Bahçelievler Sokak",
+    "Bahar Sokak",
+    "Barış Sokak",
+    "Begonya Sokak",
+    "Birlik Sokak",
+    "Çam Sokak",
+    "Çamlık Sokak",
+    "Çınartepe Sokak",
+    "Çınar Sokak",
+    "Çiğdem Sokak",
+    "Defne Sokak",
+    "Dostluk Sokak",
+    "Ege Sokak",
+    "Erguvan Sokak",
+    "Fesleğen Sokak",
+    "Fulya Sokak",
+    "Gül Sokak",
+    "Gülhatmi Sokak",
+    "Gültepe Sokak",
+    "Güneş Sokak",
+    "Gürgenlik Sokak",
+    "Hanımeli Sokak",
+    "Huzur Sokak",
+    "Ihlamur Sokak",
+    "İpekyolu Sokak",
+    "Karanfil Sokak",
+    "Kardelen Sokak",
+    "Karadeniz Sokak",
+    "Kavaklık Sokak",
+    "Kaynak Sokak",
+    "Kestanelik Sokak",
+    "Lale Sokak",
+    "Leylak Sokak",
+    "Marmara Sokak",
+    "Menekşe Sokak",
+    "Mercan Sokak",
+    "Meşelik Sokak",
+    "Mine Sokak",
+    "Nehir Sokak",
+    "Nergis Sokak",
+    "Nilüfer Sokak",
+    "Orkide Sokak",
+    "Papatya Sokak",
+    "Park Sokak",
+    "Pınar Sokak",
+    "Sakarya Sokak",
+    "Sarmaşık Sokak",
+    "Sedef Sokak",
+    "Selvi Sokak",
+    "Sevgi Sokak",
+    "Sümbül Sokak",
+    "Şafak Sokak",
+    "Şelale Sokak",
+    "Umut Sokak",
+    "Yasemin Sokak",
+    "Yeşiltepe Sokak",
+    "Yıldız Sokak",
+    "Yonca Sokak",
+    "Zambak Sokak",
+    "Zümrüt Sokak"
+  ],
   "Adnan Kahveci Mah.": [
+    "Alemdağ Caddesi",
     "Anadolu Caddesi",
     "Avrupa Caddesi",
-    "Yavuz Sultan Selim Bulvarı",
-    "Kafkas Caddesi",
-    "İnönü Caddesi",
+    "Beykent Caddesi",
     "Çalışlar Caddesi",
-    "Gülbahçe Caddesi",
+    "Davutpaşa Caddesi",
     "Erenler Caddesi",
+    "Gülbahçe Caddesi",
+    "Harbiye Caddesi",
+    "İnönü Caddesi",
+    "Kafkas Caddesi",
+    "Kışla Caddesi",
+    "Kuşdili Caddesi",
     "Osmanlı Caddesi",
     "Paşa Caddesi",
     "Plevne Caddesi",
-    "Davutpaşa Caddesi",
-    "Kuşdili Caddesi",
-    "Alemdağ Caddesi",
     "Sayaca Caddesi",
-    "Sedir Sokak",
-    "Çamlıbel Sokak",
-    "Kardelen Sokak",
-    "Ihlamur Sokak",
-    "Gül Sokak",
-    "Lale Sokak",
-    "Sümbül Sokak",
-    "Menekşe Sokak",
-    "Zambak Sokak",
-    "Karanfil Sokak",
-    "Erguvan Sokak",
-    "Papatya Sokak",
-    "Begonya Sokak",
-    "Nilüfer Sokak",
-    "Akasya Sokak",
-    "Çınar Sokak",
-    "Defne Sokak",
-    "Gürgen Sokak",
-    "Kestane Sokak",
-    "Selvi Sokak",
-    "Ladin Sokak",
-    "Çitlenbik Sokak",
-    "Kartal Sokak",
-    "Şahin Sokak",
-    "Kumru Sokak",
-    "Bülbül Sokak",
-    "Martı Sokak",
-    "Turna Sokak",
-    "Doğan Sokak",
-    "Mercan Sokak",
-    "Zümrüt Sokak",
-    "Elmas Sokak",
-    "Yakut Sokak",
-    "Sedef Sokak",
-    "Turkuaz Sokak",
-    "İnci Sokak",
-    "Yeşim Sokak",
-    "Hilal Sokak",
-    "Yıldız Sokak",
-    "Güneş Sokak",
-    "Işık Sokak",
-    "Bahar Sokak",
-    "Yaz Sokak",
-    "Güz Sokak",
-    "Eylül Sokak",
-    "Ekim Sokak",
-    "Kasım Sokak",
-    "Meltem Sokak",
-    "Poyraz Sokak",
-    "Lodos Sokak",
-    "Rüzgar Sokak",
-    "Kordonboyu Sokak",
-    "Sahil Yolu Sokak",
-    "Dereağzı Yolu Sokak",
-    "Kışla Caddesi",
-    "Harbiye Caddesi",
     "Topkapı Caddesi",
-    "Beykent Caddesi"
+    "Yavuz Sultan Selim Bulvarı",
+    "Akasya Sokak",
+    "Bahar Sokak",
+    "Begonya Sokak",
+    "Bülbül Sokak",
+    "Çamlıbel Sokak",
+    "Çınar Sokak",
+    "Çitlenbik Sokak",
+    "Defne Sokak",
+    "Dereağzı Yolu Sokak",
+    "Doğan Sokak",
+    "Ekim Sokak",
+    "Elmas Sokak",
+    "Erguvan Sokak",
+    "Eylül Sokak",
+    "Gül Sokak",
+    "Güneş Sokak",
+    "Gürgen Sokak",
+    "Güz Sokak",
+    "Hilal Sokak",
+    "Işık Sokak",
+    "Ihlamur Sokak",
+    "İnci Sokak",
+    "Karanfil Sokak",
+    "Kardelen Sokak",
+    "Kartal Sokak",
+    "Kasım Sokak",
+    "Kestane Sokak",
+    "Kordonboyu Sokak",
+    "Kumru Sokak",
+    "Ladin Sokak",
+    "Lale Sokak",
+    "Lodos Sokak",
+    "Martı Sokak",
+    "Meltem Sokak",
+    "Menekşe Sokak",
+    "Mercan Sokak",
+    "Nilüfer Sokak",
+    "Papatya Sokak",
+    "Poyraz Sokak",
+    "Rüzgar Sokak",
+    "Sahil Yolu Sokak",
+    "Sedef Sokak",
+    "Sedir Sokak",
+    "Selvi Sokak",
+    "Sümbül Sokak",
+    "Şahin Sokak",
+    "Turkuaz Sokak",
+    "Turna Sokak",
+    "Yakut Sokak",
+    "Yaz Sokak",
+    "Yeşim Sokak",
+    "Yıldız Sokak",
+    "Zambak Sokak",
+    "Zümrüt Sokak"
   ],
   "Barış Mah.": [
-    "Enver Adakan Caddesi",
+    "Ada Çiftliği Caddesi",
     "Ali Çebi Caddesi",
     "Belediye Caddesi",
-    "Zafer Caddesi",
-    "Koşuyolu Caddesi",
+    "Bursa Caddesi",
+    "Eğitim Vadisi Bulvarı",
+    "Enver Adakan Caddesi",
     "Gazi Mustafa Kemal Caddesi",
     "İkbal Caddesi",
-    "Eğitim Vadisi Bulvarı",
-    "Mehmetçik Caddesi",
-    "Ada Çiftliği Caddesi",
-    "Marmara Caddesi",
-    "Samsun Caddesi",
     "İzmir Caddesi",
-    "Bursa Caddesi",
-    "Defne Sokak",
+    "Koşuyolu Caddesi",
+    "Marmara Caddesi",
+    "Mehmetçik Caddesi",
+    "Samsun Caddesi",
+    "Zafer Caddesi",
     "Açelya Sokak",
+    "Akdeniz Sokak",
+    "Aydınlık Sokak",
+    "Barış Sokak",
     "Begonya Sokak",
+    "Birlik Sokak",
     "Çiğdem Sokak",
+    "Defne Sokak",
+    "Dostluk Sokak",
+    "Ege Sokak",
     "Fulya Sokak",
+    "Gözlem Sokak",
     "Gülce Sokak",
+    "Güneşli Sokak",
     "Hercai Sokak",
+    "Huzur Sokak",
     "Itır Sokak",
     "Kamelya Sokak",
+    "Karadeniz Sokak",
     "Leylak Sokak",
+    "Marmara Sokak",
     "Mimoza Sokak",
     "Nergis Sokak",
     "Orkide Sokak",
     "Petunya Sokak",
     "Sardunya Sokak",
     "Taflan Sokak",
-    "Yasemin Sokak",
-    "Zakkum Sokak",
-    "Akdeniz Sokak",
-    "Karadeniz Sokak",
-    "Ege Sokak",
-    "Marmara Sokak",
-    "Gözlem Sokak",
-    "Barış Sokak",
-    "Huzur Sokak",
-    "Güneşli Sokak",
-    "Aydınlık Sokak",
     "Umut Sokak",
-    "Birlik Sokak",
-    "Dostluk Sokak"
-  ],
-  "Büyükşehir Mah.": [
-    "Atatürk Bulvarı",
-    "Beylikdüzü Caddesi",
-    "Cumhuriyet Caddesi",
-    "Gazi Caddesi",
-    "Koçman Caddesi",
-    "Belediye Caddesi",
-    "Enver Adakan Caddesi",
-    "19 Mayıs Caddesi",
-    "23 Nisan Caddesi",
-    "29 Ekim Caddesi",
-    "30 Ağustos Caddesi",
-    "Çamlık Caddesi",
-    "Dumlupınar Caddesi",
-    "Sakarya Caddesi",
-    "Anafartalar Caddesi",
-    "Çamlık Sokak",
-    "Meşelik Sokak",
-    "Gürgenlik Sokak",
-    "Kestanelik Sokak",
-    "Kavaklık Sokak",
-    "Gültepe Sokak",
-    "Yeşiltepe Sokak",
-    "Adatepe Sokak",
-    "Çınartepe Sokak",
-    "Bahçelievler Sokak",
-    "Yonca Sokak",
-    "Sarmaşık Sokak",
-    "Mine Sokak",
-    "Gülhatmi Sokak",
-    "Fesleğen Sokak",
-    "Hanımeli Sokak"
+    "Yasemin Sokak",
+    "Zakkum Sokak"
   ],
   "Cumhuriyet Mah.": [
-    "Derviş Eroğlu Caddesi",
-    "Cumhuriyet Caddesi",
-    "Nazım Hikmet Bulvarı",
     "Atatürk Bulvarı",
-    "Erkin Balaban Sokak",
-    "Hanımeli Sokak",
-    "Çiçek Sokak",
-    "Gül Sokak",
-    "Lale Sokak",
-    "Sümbül Sokak",
-    "Menzil Sokak",
-    "Ufuk Sokak",
     "Barbaros Caddesi",
-    "Kocatepe Caddesi",
-    "Fatih Sultan Mehmet Caddesi",
-    "Özgürlük Caddesi",
+    "Cumhuriyet Caddesi",
     "Demokrasi Caddesi",
-    "Vatan Caddesi",
-    "İstiklal Caddesi",
+    "Derviş Eroğlu Caddesi",
+    "Fatih Sultan Mehmet Caddesi",
     "Gençlik Caddesi",
+    "İstiklal Caddesi",
+    "Kocatepe Caddesi",
+    "Nazım Hikmet Bulvarı",
+    "Özgürlük Caddesi",
+    "Vatan Caddesi",
     "Yıldırım Beyazıt Caddesi",
+    "Çiçek Sokak",
+    "Erkin Balaban Sokak",
     "Ertuğrul Gazi Sokak",
+    "Gül Sokak",
+    "Hanımeli Sokak",
+    "Lale Sokak",
+    "Menzil Sokak",
+    "Orhan Gazi Sokak",
     "Osman Gazi Sokak",
-    "Orhan Gazi Sokak"
+    "Sümbül Sokak",
+    "Ufuk Sokak"
   ],
   "Dereağzı Mah.": [
-    "Serinpınar Caddesi",
     "Bağlar Caddesi",
-    "Şehit Murat Demir Caddesi",
-    "Güzelyurt Caddesi",
-    "Kordonboyu Caddesi",
     "Denizgören Caddesi",
     "Denizkızı Caddesi",
-    "Sahilyolu Caddesi",
-    "Kavaklı Yolu Caddesi",
     "Gürpınar Caddesi",
-    "Lale Sokak",
-    "Gül Sokak",
-    "Menekşe Sokak",
-    "Karanfil Sokak",
-    "Papatya Sokak",
-    "Ihlamur Sokak",
+    "Güzelyurt Caddesi",
+    "Kavaklı Yolu Caddesi",
+    "Kordonboyu Caddesi",
+    "Sahilyolu Caddesi",
+    "Serinpınar Caddesi",
+    "Şehit Murat Demir Caddesi",
     "Akasya Sokak",
-    "Çınar Sokak",
-    "Kavak Sokak",
-    "Zeytin Sokak",
-    "Badem Sokak",
-    "İncir Sokak",
-    "Vişne Sokak",
-    "Kiraz Sokak",
-    "Elma Sokak",
     "Armut Sokak",
-    "Erik Sokak",
-    "Dut Sokak",
+    "Badem Sokak",
     "Ceviz Sokak",
-    "Fındık Sokak"
+    "Çınar Sokak",
+    "Dut Sokak",
+    "Elma Sokak",
+    "Erik Sokak",
+    "Fındık Sokak",
+    "Gül Sokak",
+    "Ihlamur Sokak",
+    "İncir Sokak",
+    "Karanfil Sokak",
+    "Kavak Sokak",
+    "Kiraz Sokak",
+    "Lale Sokak",
+    "Menekşe Sokak",
+    "Papatya Sokak",
+    "Vişne Sokak",
+    "Zeytin Sokak"
   ],
   "Gürpınar Mah.": [
-    "İstiklal Caddesi",
-    "Millet Caddesi",
-    "Hasan Tahsin Caddesi",
-    "Pekmez Caddesi",
-    "Cevizli Caddesi",
-    "Dereağzı Caddesi",
-    "Kavaklı Caddesi",
-    "Atatürk Caddesi",
-    "İnönü Caddesi",
-    "Cumhuriyet Caddesi",
     "Adnan Menderes Caddesi",
-    "Turgut Özal Caddesi",
+    "Atatürk Caddesi",
+    "Cevizli Caddesi",
+    "Cumhuriyet Caddesi",
+    "Dereağzı Caddesi",
     "Fevzi Çakmak Caddesi",
+    "Hasan Tahsin Caddesi",
+    "İnönü Caddesi",
+    "İstiklal Caddesi",
+    "Kavaklı Caddesi",
     "Kazım Karabekir Caddesi",
-    "Cevizli Sokak",
-    "Pekmez Sokak",
-    "Bal Sokak",
-    "Şerbet Sokak",
-    "Üzüm Sokak",
-    "İncir Sokak",
+    "Millet Caddesi",
+    "Pekmez Caddesi",
+    "Turgut Özal Caddesi",
     "Bağlar Sokak",
     "Bağbozumu Sokak",
-    "Değirmen Sokak",
-    "Kuyu Sokak",
-    "Çeşme Sokak",
-    "Pınar Sokak",
-    "Kaynak Sokak",
-    "Dere Sokak",
-    "Tepe Sokak",
+    "Bal Sokak",
     "Bayır Sokak",
-    "Yokuş Sokak",
-    "Düzlük Sokak"
+    "Cevizli Sokak",
+    "Çeşme Sokak",
+    "Değirmen Sokak",
+    "Dere Sokak",
+    "Düzlük Sokak",
+    "İncir Sokak",
+    "Kaynak Sokak",
+    "Kuyu Sokak",
+    "Pekmez Sokak",
+    "Pınar Sokak",
+    "Şerbet Sokak",
+    "Tepe Sokak",
+    "Üzüm Sokak",
+    "Yokuş Sokak"
   ],
   "Kavaklı Mah.": [
-    "Kavaklı Caddesi",
-    "Marmara Caddesi",
     "Ayasofya Caddesi",
-    "Yeşilyurt Caddesi",
+    "Batı Trakya Caddesi",
+    "Beylikdüzü Caddesi",
     "Deniz Aktaş Caddesi",
     "İbrahim Müteferrika Caddesi",
-    "Batı Trakya Caddesi",
     "İstanbul Caddesi",
-    "Beylikdüzü Caddesi",
+    "Kavaklı Caddesi",
     "Kavaklı Sahil Yolu Caddesi",
-    "Menekşe Sokak",
-    "Lale Sokak",
-    "Gül Sokak",
-    "Sümbül Sokak",
-    "Karanfil Sokak",
-    "Papatya Sokak",
-    "Zambak Sokak",
-    "Begonya Sokak",
-    "Nilüfer Sokak",
-    "Çiğdem Sokak",
+    "Marmara Caddesi",
+    "Yeşilyurt Caddesi",
     "Açelya Sokak",
-    "Orkide Sokak",
+    "Begonya Sokak",
+    "Çiğdem Sokak",
     "Faselis Sokak",
-    "Olimpos Sokak",
+    "Gül Sokak",
+    "Karanfil Sokak",
+    "Lale Sokak",
     "Likya Sokak",
-    "Truva Sokak"
+    "Menekşe Sokak",
+    "Nilüfer Sokak",
+    "Olimpos Sokak",
+    "Orkide Sokak",
+    "Papatya Sokak",
+    "Sümbül Sokak",
+    "Truva Sokak",
+    "Zambak Sokak"
   ],
   "Marmara Mah.": [
-    "İhlas Caddesi",
-    "Hürriyet Bulvarı",
-    "Yurt Caddesi",
-    "Liman Caddesi",
-    "Estetik Caddesi",
-    "Kavaklı Sahil Yolu Caddesi",
     "Ambarlı Liman Yolu Caddesi",
-    "Marmara Evleri Caddesi",
+    "Estetik Caddesi",
     "Fatih Caddesi",
-    "Estetik Sokak",
-    "Modern Sokak",
-    "Çağdaş Sokak",
-    "Gelişim Sokak",
-    "Ufuk Sokak",
-    "Aydınlık Sokak",
-    "Denizatı Sokak",
-    "Yakamoz Sokak",
-    "Dalgakıran Sokak",
-    "Körfez Sokak",
+    "Hürriyet Bulvarı",
+    "İhlas Caddesi",
+    "Kavaklı Sahil Yolu Caddesi",
+    "Liman Caddesi",
+    "Marmara Evleri Caddesi",
+    "Yurt Caddesi",
     "Ada Sokak",
-    "Liman Sokak",
-    "İskele Sokak",
+    "Aydınlık Sokak",
+    "Çağdaş Sokak",
+    "Dalgakıran Sokak",
+    "Denizatı Sokak",
+    "Estetik Sokak",
     "Fener Sokak",
+    "Gelişim Sokak",
+    "İskele Sokak",
     "Kordon Sokak",
-    "Yelken Sokak",
+    "Körfez Sokak",
+    "Liman Sokak",
     "Martı Sokak",
-    "Pelikan Sokak"
+    "Modern Sokak",
+    "Pelikan Sokak",
+    "Ufuk Sokak",
+    "Yakamoz Sokak",
+    "Yelken Sokak"
   ],
   "Sahil Mah.": [
-    "Kocatepe Caddesi",
-    "Marmara Caddesi",
+    "Barbaros Caddesi",
     "Beylerbeyi Caddesi",
-    "Sancaktar Caddesi",
-    "Kordonboyu Caddesi",
-    "Yatlimanı Caddesi",
     "Denizciler Caddesi",
     "Kaptanlar Caddesi",
+    "Kocatepe Caddesi",
+    "Kordonboyu Caddesi",
+    "Marmara Caddesi",
     "Reis Caddesi",
-    "Barbaros Caddesi",
-    "Kumsal Sokak",
-    "Yalı Sokak",
-    "Dalgıç Sokak",
-    "Mercan Sokak",
-    "İnci Sokak",
-    "Sedef Sokak",
-    "Denizkabuğu Sokak",
-    "Martı Sokak",
-    "Karabatak Sokak",
-    "Balıkçı Sokak",
+    "Sancaktar Caddesi",
+    "Yatlimanı Caddesi",
     "Ağlar Sokak",
-    "Tekne Sokak"
+    "Balıkçı Sokak",
+    "Dalgıç Sokak",
+    "Denizkabuğu Sokak",
+    "İnci Sokak",
+    "Karabatak Sokak",
+    "Kumsal Sokak",
+    "Martı Sokak",
+    "Mercan Sokak",
+    "Sedef Sokak",
+    "Tekne Sokak",
+    "Yalı Sokak"
   ],
   "Yakuplu Mah.": [
-    "Hürriyet Bulvarı",
+    "Ambarlı Yolu Caddesi",
+    "Bakırcılar Caddesi",
+    "Beysan Sanayi Sitesi Yolu",
+    "Birlik Caddesi",
+    "Dere Caddesi",
     "Fatih Sultan Mehmet Caddesi",
+    "Güzelyurt Caddesi",
     "Haramidere Caddesi",
+    "Hürriyet Bulvarı",
     "Kervansaray Caddesi",
     "Liman Caddesi",
-    "Beysan Sanayi Sitesi Yolu",
-    "Ambarlı Yolu Caddesi",
-    "Ömür Caddesi",
-    "Birlik Caddesi",
-    "Güzelyurt Caddesi",
-    "Dere Caddesi",
-    "Bakırcılar Caddesi",
     "Mermerciler Caddesi",
+    "Ömür Caddesi",
     "Pirinçciler Caddesi",
-    "Meşe Sokak",
-    "Gürgen Sokak",
-    "Çınar Sokak",
-    "Kavak Sokak",
-    "Ihlamur Sokak",
-    "Akasya Sokak",
-    "Kestane Sokak",
-    "Söğüt Sokak",
-    "Dişbudak Sokak",
-    "Karaağaç Sokak",
-    "Selvi Sokak",
-    "Zeytin Sokak",
-    "Fındık Sokak",
-    "Ceviz Sokak",
-    "Badem Sokak",
-    "İncir Sokak",
-    "Dut Sokak",
-    "Asma Sokak",
     "1. Sokak",
     "2. Sokak",
     "3. Sokak",
@@ -719,12 +759,30 @@
     "10. Sokak",
     "20. Sokak",
     "50. Sokak",
+    "Akasya Sokak",
+    "Asma Sokak",
+    "Badem Sokak",
+    "Ceviz Sokak",
+    "Çınar Sokak",
+    "Dişbudak Sokak",
+    "Dut Sokak",
+    "Fındık Sokak",
     "Gül Sokak",
-    "Lale Sokak",
+    "Gürgen Sokak",
+    "Ihlamur Sokak",
+    "İncir Sokak",
+    "Karaağaç Sokak",
     "Karanfil Sokak",
-    "Sümbül Sokak",
+    "Kavak Sokak",
+    "Kestane Sokak",
+    "Lale Sokak",
     "Menekşe Sokak",
-    "Papatya Sokak"
+    "Meşe Sokak",
+    "Papatya Sokak",
+    "Selvi Sokak",
+    "Söğüt Sokak",
+    "Sümbül Sokak",
+    "Zeytin Sokak"
   ]
 };
 
@@ -771,6 +829,19 @@
       updateStreetSelect('schoolNeighborhood', 'schoolStreet');
     }
 
+    function checkCustomStreet(selectId, customInputId) {
+      const sel = document.getElementById(selectId);
+      const customInput = document.getElementById(customInputId);
+      if (!sel || !customInput) return;
+      if (sel.value === 'Diğer Cadde/Sokak') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
+    }
+
     function updateStreetSelect(neighId, streetId) {
       const nVal = document.getElementById(neighId).value;
       const streetSelect = document.getElementById(streetId);
@@ -779,7 +850,7 @@
       
       const defaultOpt = document.createElement('option');
       defaultOpt.value = '';
-      defaultOpt.innerText = '-- Cadde / Sokak Seçiniz --';
+      defaultOpt.innerText = '-- Cadde / Sokak Seçiniz (' + ((BEYLIKDUZU_DATA[nVal]||[]).length) + ' Sokak) --';
       streetSelect.appendChild(defaultOpt);
 
       let streets = (BEYLIKDUZU_DATA[nVal] || []).slice();
@@ -793,11 +864,19 @@
         streetSelect.appendChild(opt);
       });
 
-      // Listenin en sonuna 'Diğer Cadde / Sokak' ekle
+      // Listenin en sonuna 'Diğer' ekle
       const otherOpt = document.createElement('option');
       otherOpt.value = 'Diğer Cadde/Sokak';
-      otherOpt.innerText = '➕ Diğer Cadde / Sokak (Listede Yoksa)';
+      otherOpt.innerText = '✍️ Diğer Cadde / Sokak (Manuel Yazmak İçin)';
       streetSelect.appendChild(otherOpt);
+
+      // İlgili custom kutusunu gizle
+      const customInputId = streetId + 'Custom';
+      const customInput = document.getElementById(customInputId);
+      if (customInput) {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
     }
 
     // KULLANICI DOĞRULAMA
@@ -927,7 +1006,11 @@
       const name = document.getElementById('newSchoolName').value.trim();
       const type = document.getElementById('newClassType').value;
       const neighborhood = document.getElementById('schoolNeighborhood').value;
-      const street = document.getElementById('schoolStreet').value;
+      let street = document.getElementById('schoolStreet').value;
+      const streetCustom = document.getElementById('schoolStreetCustom').value.trim();
+      if (street === 'Diğer Cadde/Sokak' || !street) {
+        if (streetCustom) street = streetCustom;
+      }
       const buildingName = document.getElementById('schoolBuildingName').value.trim();
       const buildingNo = document.getElementById('schoolBuildingNo').value.trim();
 
@@ -952,6 +1035,8 @@
       document.getElementById('newSchoolName').value = '';
       document.getElementById('schoolBuildingName').value = '';
       document.getElementById('schoolBuildingNo').value = '';
+      document.getElementById('schoolStreetCustom').value = '';
+      document.getElementById('schoolStreetCustom').style.display = 'none';
       saveData();
     }
 
@@ -980,7 +1065,18 @@
       document.getElementById('editSchoolName').value = c.school;
       document.getElementById('editSchoolNeighborhood').value = c.neighborhood || Object.keys(BEYLIKDUZU_DATA)[0];
       updateStreetSelect('editSchoolNeighborhood', 'editSchoolStreet');
-      if (c.street) document.getElementById('editSchoolStreet').value = c.street;
+      const editSel = document.getElementById('editSchoolStreet');
+      const editCustom = document.getElementById('editSchoolStreetCustom');
+      const exists = Array.from(editSel.options).some(o => o.value === c.street);
+      if (exists) {
+        editSel.value = c.street;
+        editCustom.style.display = 'none';
+        editCustom.value = '';
+      } else if (c.street) {
+        editSel.value = 'Diğer Cadde/Sokak';
+        editCustom.style.display = 'block';
+        editCustom.value = c.street;
+      }
       document.getElementById('editSchoolBuildingName').value = c.buildingName || '';
       document.getElementById('editSchoolBuildingNo').value = c.buildingNo || '';
       document.getElementById('editModal').style.display = 'flex';
@@ -991,7 +1087,11 @@
       const id = parseInt(document.getElementById('editClassId').value);
       const name = document.getElementById('editSchoolName').value.trim();
       const neighborhood = document.getElementById('editSchoolNeighborhood').value;
-      const street = document.getElementById('editSchoolStreet').value;
+      let street = document.getElementById('editSchoolStreet').value;
+      const streetCustom = document.getElementById('editSchoolStreetCustom').value.trim();
+      if (street === 'Diğer Cadde/Sokak' || !street) {
+        if (streetCustom) street = streetCustom;
+      }
       const buildingName = document.getElementById('editSchoolBuildingName').value.trim();
       const buildingNo = document.getElementById('editSchoolBuildingNo').value.trim();
 
@@ -1016,7 +1116,11 @@
       const sName = document.getElementById('studentName').value.trim();
       const sDiag = document.getElementById('studentDiag').value;
       const sNeigh = document.getElementById('studentNeighborhood').value;
-      const sStreet = document.getElementById('studentStreet').value;
+      let sStreet = document.getElementById('studentStreet').value;
+      const sStreetCustom = document.getElementById('studentStreetCustom').value.trim();
+      if (sStreet === 'Diğer Cadde/Sokak' || !sStreet) {
+        if (sStreetCustom) sStreet = sStreetCustom;
+      }
       const sBName = document.getElementById('studentBuildingName').value.trim();
       const sBNo = document.getElementById('studentBuildingNo').value.trim();
       const resBox = document.getElementById('matchResult');
@@ -1086,6 +1190,8 @@
         document.getElementById('studentName').value = '';
         document.getElementById('studentBuildingName').value = '';
         document.getElementById('studentBuildingNo').value = '';
+        document.getElementById('studentStreetCustom').value = '';
+        document.getElementById('studentStreetCustom').style.display = 'none';
       }
     }
 
