@@ -171,6 +171,14 @@
           </select>
         </div>
         <div style="flex: 1;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Bina / Site Adı</label>
+          <input type="text" id="studentBuildingName" placeholder="Örn: Güneş Sitesi / A Blok" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+        </div>
+        <div style="flex: 0.7;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Bina No / Kapı</label>
+          <input type="text" id="studentBuildingNo" placeholder="Örn: 12/B" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+        </div>
+        <div style="flex: 1;">
           <button class="btn-accent" style="width:100%;" type="button" onclick="findClosestSchool()">🔍 En Yakın Okulu Bul</button>
         </div>
       </div>
@@ -218,6 +226,14 @@
           <select id="schoolStreet" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
             <!-- JS doldurur -->
           </select>
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Bina / Kampüs Adı</label>
+          <input type="text" id="schoolBuildingName" placeholder="Örn: Ana Bina / A Blok" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+        </div>
+        <div style="flex: 0.7;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Bina No / Kapı</label>
+          <input type="text" id="schoolBuildingNo" placeholder="Örn: 8" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
         </div>
         <div style="flex: 0.8;">
           <button class="btn-primary" style="width:100%;" type="button" onclick="addClass()">+ Sınıfı Aç</button>
@@ -292,6 +308,14 @@
       <div class="form-group">
         <label>Cadde / Sokak</label>
         <select id="editSchoolStreet"></select>
+      </div>
+      <div class="form-group">
+        <label>Bina / Kampüs Adı</label>
+        <input type="text" id="editSchoolBuildingName" placeholder="Örn: Ana Bina">
+      </div>
+      <div class="form-group">
+        <label>Bina No / Dış Kapı No</label>
+        <input type="text" id="editSchoolBuildingNo" placeholder="Örn: 8">
       </div>
       <div class="modal-actions">
         <button class="btn-pass" type="button" onclick="closeEditModal()">İptal</button>
@@ -524,6 +548,8 @@
       const type = document.getElementById('newClassType').value;
       const neighborhood = document.getElementById('schoolNeighborhood').value;
       const street = document.getElementById('schoolStreet').value;
+      const buildingName = document.getElementById('schoolBuildingName').value.trim();
+      const buildingNo = document.getElementById('schoolBuildingNo').value.trim();
 
       if (!name) return alert('Lütfen okul adı girin.');
 
@@ -536,12 +562,16 @@
         type: type,
         neighborhood: neighborhood,
         street: street,
+        buildingName: buildingName,
+        buildingNo: buildingNo,
         branch: branchLetter + ' Şubesi',
         maxCapacity: CAPACITIES[type],
         currentStudents: 0
       });
 
       document.getElementById('newSchoolName').value = '';
+      document.getElementById('schoolBuildingName').value = '';
+      document.getElementById('schoolBuildingNo').value = '';
       saveData();
     }
 
@@ -571,6 +601,8 @@
       document.getElementById('editSchoolNeighborhood').value = c.neighborhood || Object.keys(BEYLIKDUZU_DATA)[0];
       updateStreetSelect('editSchoolNeighborhood', 'editSchoolStreet');
       if (c.street) document.getElementById('editSchoolStreet').value = c.street;
+      document.getElementById('editSchoolBuildingName').value = c.buildingName || '';
+      document.getElementById('editSchoolBuildingNo').value = c.buildingNo || '';
       document.getElementById('editModal').style.display = 'flex';
     }
     function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
@@ -580,6 +612,8 @@
       const name = document.getElementById('editSchoolName').value.trim();
       const neighborhood = document.getElementById('editSchoolNeighborhood').value;
       const street = document.getElementById('editSchoolStreet').value;
+      const buildingName = document.getElementById('editSchoolBuildingName').value.trim();
+      const buildingNo = document.getElementById('editSchoolBuildingNo').value.trim();
 
       if (!name) return alert('Okul adı boş olamaz.');
       const c = classes.find(item => item.id === id);
@@ -587,6 +621,8 @@
         c.school = name;
         c.neighborhood = neighborhood;
         c.street = street;
+        c.buildingName = buildingName;
+        c.buildingNo = buildingNo;
         saveData();
       }
       closeEditModal();
@@ -601,6 +637,8 @@
       const sDiag = document.getElementById('studentDiag').value;
       const sNeigh = document.getElementById('studentNeighborhood').value;
       const sStreet = document.getElementById('studentStreet').value;
+      const sBName = document.getElementById('studentBuildingName').value.trim();
+      const sBNo = document.getElementById('studentBuildingNo').value.trim();
       const resBox = document.getElementById('matchResult');
       const resDetails = document.getElementById('matchDetails');
 
@@ -642,12 +680,15 @@
       resBox.style.borderColor = '#86efac';
       document.querySelector('.match-actions').style.display = 'flex';
 
+      const sAddrFull = `${sNeigh}, ${sStreet}` + (sBName ? `, ${sBName}` : '') + (sBNo ? ` No:${sBNo}` : '');
+      const oAddrFull = (best.neighborhood || 'Belirtilmemiş') + (best.street ? `, ${best.street}` : '') + (best.buildingName ? `, ${best.buildingName}` : '') + (best.buildingNo ? ` No:${best.buildingNo}` : '');
+
       resDetails.innerHTML = `
         <strong>Öğrenci:</strong> ${sName} (${sDiag})<br>
-        <strong>Öğrenci Adresi:</strong> ${sNeigh}, ${sStreet}<br>
+        <strong>Öğrenci İkametgahı:</strong> ${sAddrFull}<br>
         <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #cbd5e1;">
         <span style="font-size: 1.05rem; color: #166534;">🏆 <strong>Önerilen En Yakın Okul:</strong> ${best.school} (${best.branch})</span><br>
-        <strong>Okul Adresi:</strong> ${best.neighborhood || 'Belirtilmemiş'}, ${best.street || ''}<br>
+        <strong>Okul Açık Adresi:</strong> ${oAddrFull}<br>
         <strong>Mesafe Durumu:</strong> <span style="color:#2563eb; font-weight:600;">${distText}</span> | 
         <strong>Kalan Boş Kontenjan:</strong> <span style="color:#16a34a; font-weight:700;">${remaining} Öğrenci</span><br><br>
         <em>Bu öğrenciyi ilgili okula yönlendirip kontenjandan bir düşüş sağlamak istiyor musunuz?</em>
@@ -663,6 +704,8 @@
         alert(`Tebrikler! ${pendingStudentName} öğrencisi ${target.school} (${target.branch}) bünyesine başarıyla yerleştirildi. Kalan kontenjan: ${target.maxCapacity - target.currentStudents}`);
         document.getElementById('matchResult').style.display = 'none';
         document.getElementById('studentName').value = '';
+        document.getElementById('studentBuildingName').value = '';
+        document.getElementById('studentBuildingNo').value = '';
       }
     }
 
@@ -692,7 +735,11 @@
       list.forEach(c => {
         const remaining = c.maxCapacity - c.currentStudents;
         const isFull = remaining === 0;
-        const addrText = c.neighborhood ? `${c.neighborhood}<br><small style="color:#64748b;">${c.street || ''}</small>` : '<span style="color:#94a3b8;">Adres girilmemiş</span>';
+        let extraAddr = [];
+        if (c.street) extraAddr.push(c.street);
+        if (c.buildingName) extraAddr.push(c.buildingName);
+        if (c.buildingNo) extraAddr.push('No:' + c.buildingNo);
+        const addrText = c.neighborhood ? `<strong>${c.neighborhood}</strong><br><small style="color:#64748b;">${extraAddr.join(', ')}</small>` : '<span style="color:#94a3b8;">Adres girilmemiş</span>';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
