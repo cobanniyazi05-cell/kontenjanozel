@@ -184,18 +184,18 @@
           <input type="text" id="studentName" placeholder="Örn: Ali Yılmaz" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
         </div>
         <div style="flex: 1.1;">
-          <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Tanılama Türü</label>
-          <select id="studentDiag" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
-            <option value="Hafif Düzey-Zihinsel">Hafif Düzey - Zihinsel</option>
-            <option value="Hafif Düzey-Otizm">Hafif Düzey - Otizm</option>
-          </select>
-        </div>
-        <div style="flex: 1.1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Öğrenci Kademesi</label>
-          <select id="studentLevel" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+          <select id="studentLevel" onchange="updateStudentDiagByLevel()" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
             <option value="İlkokul">İlkokul</option>
             <option value="Ortaokul">Ortaokul</option>
             <option value="Okul Öncesi">Okul Öncesi</option>
+          </select>
+        </div>
+        <div style="flex: 1.1;">
+          <label style="font-size: 0.8rem; font-weight:600; color:#4c1d95;">Tanılama / Sınıf Türü</label>
+          <select id="studentDiag" style="width:100%; height:40px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+            <option value="Hafif Düzey-Zihinsel">Hafif Düzey - Zihinsel</option>
+            <option value="Hafif Düzey-Otizm">Hafif Düzey - Otizm</option>
           </select>
         </div>
         <div style="flex: 1.2;">
@@ -251,7 +251,7 @@
         </div>
         <div style="flex: 1.1;">
           <label style="font-size: 0.8rem; font-weight:600; color:#334155;">Okul Kademesi</label>
-          <select id="newSchoolLevel" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
+          <select id="newSchoolLevel" onchange="updateClassTypesByLevel('newSchoolLevel', 'newClassType')" style="width:100%; height:40px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;">
             <option value="İlkokul">İlkokul</option>
             <option value="Ortaokul">Ortaokul</option>
             <option value="Okul Öncesi">Okul Öncesi</option>
@@ -288,6 +288,32 @@
         <div style="flex: 0.8;">
           <button class="btn-primary" style="width:100%;" type="button" onclick="addClass()">+ Sınıfı Aç</button>
         </div>
+      </div>
+    </div>
+
+    <!-- GRUP 0: ÖZEL EĞİTİM ANASINIFLARI -->
+    <div class="category-group">
+      <div class="section-title" style="color: #9d174d;">
+        <span>🎈 Özel Eğitim Anasınıfları (Maksimum 5 Kapasiteli)</span>
+        <span class="badge-count" id="anasinifiCount" style="background:#fce7f3; color:#9d174d;">0 Sınıf</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Okul Adı</th>
+              <th style="width: 10%;">Kademe</th>
+              <th style="width: 20%;">Okul Adresi</th>
+              <th style="width: 8%;">Şube</th>
+              <th style="width: 8%;">Kapasite</th>
+              <th style="width: 8%;">Mevcut</th>
+              <th style="width: 13%;">Kalan Boş</th>
+              <th style="width: 8%;">Sevk (+/-)</th>
+              <th style="width: 8%;">İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="tableAnasinifiBody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -355,10 +381,17 @@
       </div>
       <div class="form-group">
         <label>Okul Kademesi</label>
-        <select id="editSchoolLevel">
+        <select id="editSchoolLevel" onchange="updateClassTypesByLevel('editSchoolLevel', 'editClassType')">
           <option value="İlkokul">İlkokul</option>
           <option value="Ortaokul">Ortaokul</option>
           <option value="Okul Öncesi">Okul Öncesi</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sınıf Türü</label>
+        <select id="editClassType">
+          <option value="Hafif Düzey-Zihinsel">Hafif Düzey-Zihinsel (Maks 10)</option>
+          <option value="Hafif Düzey-Otizm">Hafif Düzey-Otizm (Maks 4)</option>
         </select>
       </div>
       <div class="form-group">
@@ -983,6 +1016,8 @@
       document.getElementById('mainApp').style.display = 'block';
       document.getElementById('currentUserName').innerText = '👤 ' + userObj.name;
       populateNeighborhoodSelects();
+      updateClassTypesByLevel('newSchoolLevel', 'newClassType');
+      updateStudentDiagByLevel();
       renderAllTables();
     }
 
@@ -1053,7 +1088,58 @@
       classes = JSON.parse(localStorage.getItem('special_edu_classes_v3')) || [];
     } catch(e){}
 
-    const CAPACITIES = { 'Hafif Düzey-Zihinsel': 10, 'Hafif Düzey-Otizm': 4 };
+    // KADEME SEÇİMİNE GÖRE SINIF TÜRÜ VE KAPASİTE YÖNETİMİ
+    function updateClassTypesByLevel(levelId, classTypeId, selectedType) {
+      const lvl = document.getElementById(levelId).value;
+      const typeSelect = document.getElementById(classTypeId);
+      if (!typeSelect) return;
+      typeSelect.innerHTML = '';
+
+      if (lvl === 'Okul Öncesi') {
+        const opt = document.createElement('option');
+        opt.value = 'Özel Eğitim Anasınıfı';
+        opt.innerText = 'Özel Eğitim Anasınıfı (Maks 5)';
+        typeSelect.appendChild(opt);
+      } else {
+        const opt1 = document.createElement('option');
+        opt1.value = 'Hafif Düzey-Zihinsel';
+        opt1.innerText = 'Hafif Düzey-Zihinsel (Maks 10)';
+        const opt2 = document.createElement('option');
+        opt2.value = 'Hafif Düzey-Otizm';
+        opt2.innerText = 'Hafif Düzey-Otizm (Maks 4)';
+        typeSelect.appendChild(opt1);
+        typeSelect.appendChild(opt2);
+      }
+
+      if (selectedType) {
+        typeSelect.value = selectedType;
+      }
+    }
+
+    function updateStudentDiagByLevel() {
+      const lvl = document.getElementById('studentLevel').value;
+      const diagSelect = document.getElementById('studentDiag');
+      if (!diagSelect) return;
+      diagSelect.innerHTML = '';
+
+      if (lvl === 'Okul Öncesi') {
+        const opt = document.createElement('option');
+        opt.value = 'Özel Eğitim Anasınıfı';
+        opt.innerText = 'Özel Eğitim Anasınıfı';
+        diagSelect.appendChild(opt);
+      } else {
+        const opt1 = document.createElement('option');
+        opt1.value = 'Hafif Düzey-Zihinsel';
+        opt1.innerText = 'Hafif Düzey - Zihinsel';
+        const opt2 = document.createElement('option');
+        opt2.value = 'Hafif Düzey-Otizm';
+        opt2.innerText = 'Hafif Düzey - Otizm';
+        diagSelect.appendChild(opt1);
+        diagSelect.appendChild(opt2);
+      }
+    }
+
+    const CAPACITIES = { 'Hafif Düzey-Zihinsel': 10, 'Hafif Düzey-Otizm': 4, 'Özel Eğitim Anasınıfı': 5 };
 
     function saveData() {
       try { localStorage.setItem('special_edu_classes_v3', JSON.stringify(classes)); } catch(e){}
@@ -1124,6 +1210,7 @@
       document.getElementById('editClassId').value = id;
       document.getElementById('editSchoolName').value = c.school;
       document.getElementById('editSchoolLevel').value = c.level || 'İlkokul';
+      updateClassTypesByLevel('editSchoolLevel', 'editClassType', c.type);
       document.getElementById('editSchoolNeighborhood').value = c.neighborhood || Object.keys(BEYLIKDUZU_DATA)[0];
       updateStreetSelect('editSchoolNeighborhood', 'editSchoolStreet');
       const editSel = document.getElementById('editSchoolStreet');
@@ -1148,6 +1235,7 @@
       const id = parseInt(document.getElementById('editClassId').value);
       const name = document.getElementById('editSchoolName').value.trim();
       const level = document.getElementById('editSchoolLevel').value;
+      const type = document.getElementById('editClassType').value;
       const neighborhood = document.getElementById('editSchoolNeighborhood').value;
       let street = document.getElementById('editSchoolStreet').value;
       const streetCustom = document.getElementById('editSchoolStreetCustom').value.trim();
@@ -1162,6 +1250,8 @@
       if (c) {
         c.school = name;
         c.level = level;
+        c.type = type;
+        c.maxCapacity = CAPACITIES[type] || 5;
         c.neighborhood = neighborhood;
         c.street = street;
         c.buildingName = buildingName;
@@ -1361,20 +1451,27 @@
 
     // TABLOLARI ÇİZME
     function renderAllTables() {
+      const aBody = document.getElementById('tableAnasinifiBody');
       const zBody = document.getElementById('tableZihinselBody');
       const oBody = document.getElementById('tableOtizmBody');
       if (!zBody || !oBody) return;
-      zBody.innerHTML = ''; oBody.innerHTML = '';
+      if (aBody) aBody.innerHTML = '';
+      zBody.innerHTML = ''; 
+      oBody.innerHTML = '';
 
       updateDistrictSummary();
 
       const sorted = [...classes].sort((a,b) => a.school.localeCompare(b.school, 'tr'));
-      const zList = sorted.filter(c => c.type === 'Hafif Düzey-Zihinsel');
-      const oList = sorted.filter(c => c.type === 'Hafif Düzey-Otizm');
+      const aList = sorted.filter(c => c.type === 'Özel Eğitim Anasınıfı' || c.level === 'Okul Öncesi');
+      const zList = sorted.filter(c => c.type === 'Hafif Düzey-Zihinsel' && c.level !== 'Okul Öncesi');
+      const oList = sorted.filter(c => c.type === 'Hafif Düzey-Otizm' && c.level !== 'Okul Öncesi');
 
+      const aCountEl = document.getElementById('anasinifiCount');
+      if (aCountEl) aCountEl.innerText = `${aList.length} Sınıf`;
       document.getElementById('zihinselCount').innerText = `${zList.length} Sınıf`;
       document.getElementById('otizmCount').innerText = `${oList.length} Sınıf`;
 
+      if (aBody) renderRows(aBody, aList);
       renderRows(zBody, zList);
       renderRows(oBody, oList);
     }
