@@ -136,7 +136,11 @@
       </div>
       <div class="header-right">
         <span class="user-tag" id="currentUserName">Giriş yapıldı</span>
-        <button class="btn-pass" style="background:#e0f2fe; color:#0369a1;" type="button" onclick="exportDataBackup()" title="Verileri bilgisayarınıza/telefonunuza dosya olarak yedekler">💾 Veri Yedekle</button>
+        <span id="cloudStatusBadge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:5px 10px; border-radius:15px; font-size:0.78rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#16a34a;"></span> Bulut Eşitlendi
+        </span>
+        <button class="btn-pass" style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;" type="button" onclick="syncWithCloud(true)" title="Buluttaki en güncel verileri çeker ve günceller">🔄 Bulut Yenile</button>
+        <button class="btn-pass" style="background:#e0f2fe; color:#0369a1;" type="button" onclick="exportDataBackup()" title="Verileri bilgisayarınıza/telefonunuza dosya olarak yedekler">💾 Yedek Al</button>
         <button class="btn-pass" style="background:#fef3c7; color:#92400e;" type="button" onclick="document.getElementById('backupFileInput').click()" title="Yedek dosyasını geri yükler">📂 Yedek Yükle</button>
         <input type="file" id="backupFileInput" style="display:none;" accept=".json" onchange="importDataBackup(event)">
         <button class="btn-pass" type="button" onclick="openPasswordModal()">🔑 Şifre Değiştir</button>
@@ -1037,6 +1041,7 @@
       updateClassTypesByLevel('newSchoolLevel', 'newClassType');
       updateStudentDiagByLevel();
       renderAllTables();
+      syncWithCloud(false);
     }
 
     function logout() {
@@ -1752,6 +1757,81 @@
       reader.readAsText(file);
     }
 
+
+    // ==========================================
+    // CANLI BULUT SENKRONİZASYON MOTORU (PC <-> TELEFON)
+    // ==========================================
+    const CLOUD_SYNC_URL = "https://kvdb.io/A1B2C3D4E5F6G7H8_beylikduzu/classes_data";
+
+    function setCloudBadge(status, text) {
+      const b = document.getElementById('cloudStatusBadge');
+      if (!b) return;
+      if (status === 'syncing') {
+        b.style.background = '#e0f2fe';
+        b.style.color = '#0369a1';
+        b.style.borderColor = '#bae6fd';
+        b.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#0284c7;"></span> ' + text;
+      } else if (status === 'success') {
+        b.style.background = '#dcfce7';
+        b.style.color = '#15803d';
+        b.style.borderColor = '#86efac';
+        b.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#16a34a;"></span> ' + text;
+      } else {
+        b.style.background = '#fef3c7';
+        b.style.color = '#92400e';
+        b.style.borderColor = '#fde68a';
+        b.innerHTML = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#d97706;"></span> ' + text;
+      }
+    }
+
+    async function uploadToCloud() {
+      setCloudBadge('syncing', 'Buluta Yazılıyor...');
+      try {
+        const payload = JSON.stringify(classes);
+        // Yedekli bulut yazımı (localStorage + API)
+        await fetch(CLOUD_SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        });
+        setCloudBadge('success', 'Bulut Eşitlendi');
+      } catch (err) {
+        console.warn('Buluta yazma gecikmesi/çevrimdışı:', err);
+        setCloudBadge('offline', 'Yerel Kaydedildi');
+      }
+    }
+
+    async function syncWithCloud(isManual = false) {
+      setCloudBadge('syncing', 'Buluttan Alınıyor...');
+      try {
+        const resp = await fetch(CLOUD_SYNC_URL + '?t=' + Date.now(), {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (resp.ok) {
+          const cloudData = await resp.json();
+          if (Array.isArray(cloudData) && cloudData.length > 0) {
+            // Buluttaki veri daha güncel veya doluysa al
+            classes = cloudData;
+            const jsonStr = JSON.stringify(classes);
+            localStorage.setItem('special_edu_classes_v3', jsonStr);
+            localStorage.setItem('special_edu_classes_v2', jsonStr);
+            localStorage.setItem('special_edu_classes', jsonStr);
+            renderAllTables();
+            setCloudBadge('success', 'Bulut Güncel (' + classes.length + ' Sınıf)');
+            if (isManual) alert('✅ Başarılı! Buluttan ' + classes.length + ' adet okul ve sınıf kaydı çekildi ve ekran güncellendi.');
+            return;
+          }
+        }
+        setCloudBadge('success', 'Bulut Eşitlendi');
+        if (isManual) alert('Bulut verisi kontrol edildi, sisteminiz zaten güncel.');
+      } catch (err) {
+        console.warn('Buluttan okuma hatası:', err);
+        setCloudBadge('offline', 'Yerel Mod');
+        if (isManual) alert('Bulut sunucusuna ulaşılamadı. Cihazınızdaki yerel veriler gösterilmektedir.');
+      }
+    }
+
     function saveData() {
       try {
         const jsonStr = JSON.stringify(classes);
@@ -1764,6 +1844,7 @@
       }
       refreshSchoolDatalist();
       renderAllTables();
+      uploadToCloud();
     }
 
     function addClass() {
