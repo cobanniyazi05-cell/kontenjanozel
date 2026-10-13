@@ -136,6 +136,9 @@
       </div>
       <div class="header-right">
         <span class="user-tag" id="currentUserName">Giriş yapıldı</span>
+        <button class="btn-pass" style="background:#e0f2fe; color:#0369a1;" type="button" onclick="exportDataBackup()" title="Verileri bilgisayarınıza/telefonunuza dosya olarak yedekler">💾 Veri Yedekle</button>
+        <button class="btn-pass" style="background:#fef3c7; color:#92400e;" type="button" onclick="document.getElementById('backupFileInput').click()" title="Yedek dosyasını geri yükler">📂 Yedek Yükle</button>
+        <input type="file" id="backupFileInput" style="display:none;" accept=".json" onchange="importDataBackup(event)">
         <button class="btn-pass" type="button" onclick="openPasswordModal()">🔑 Şifre Değiştir</button>
         <button class="btn-logout" type="button" onclick="logout()">Çıkış Yap</button>
       </div>
@@ -1082,11 +1085,479 @@
       setTimeout(closePasswordModal, 1000);
     }
 
-    // VERİ YÖNETİMİ
-    let classes = [];
-    try {
-      classes = JSON.parse(localStorage.getItem('special_edu_classes_v3')) || [];
-    } catch(e){}
+
+    // BEYLİKDÜZÜ RESMİ OKUL REHBERİ VE OTOMATİK ADRES VERİTABANI
+    const BEYLIKDUZU_SCHOOLS = [
+  {
+    "name": "Baki Gündüz İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Dereağzı Mah.",
+    "street": "Hasan Tahsin Caddesi",
+    "bName": "Resul Sokak",
+    "bNo": "1"
+  },
+  {
+    "name": "Beylikdüzü Haldun Taner İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Cumhuriyet Mah.",
+    "street": "Atatürk Bulvarı",
+    "bName": "Söğüt Sk.",
+    "bNo": "1"
+  },
+  {
+    "name": "Beylikdüzü Mehmet Gesoğlu İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Hürriyet Bulvarı",
+    "bName": "",
+    "bNo": "45"
+  },
+  {
+    "name": "Bizimkent İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Cumhuriyet Mah.",
+    "street": "Derviş Eroğlu Caddesi",
+    "bName": "E-5 Yan Yol",
+    "bNo": "2"
+  },
+  {
+    "name": "Büyükşehir İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Büyükşehir Mah.",
+    "street": "Atatürk Bulvarı",
+    "bName": "Akasya Sokak",
+    "bNo": "3"
+  },
+  {
+    "name": "Çağdaş Yaşam N. Kamuran Emiroğlu İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Gürpınar Mah.",
+    "street": "İstiklal Caddesi",
+    "bName": "",
+    "bNo": "14"
+  },
+  {
+    "name": "Çağdaş Yaşam Prof. Ahmet Merdivenci İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Kavaklı Mah.",
+    "street": "Kavaklı Caddesi",
+    "bName": "",
+    "bNo": "22"
+  },
+  {
+    "name": "Dr. Haydar Aslan İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Barış Mah.",
+    "street": "Enver Adakan Caddesi",
+    "bName": "",
+    "bNo": "6"
+  },
+  {
+    "name": "Gürpınar Yeşilkent İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Gürpınar Mah.",
+    "street": "Millet Caddesi",
+    "bName": "",
+    "bNo": "18"
+  },
+  {
+    "name": "İhlas İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Marmara Mah.",
+    "street": "İhlas Caddesi",
+    "bName": "",
+    "bNo": "4"
+  },
+  {
+    "name": "Kavaklı İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Kavaklı Mah.",
+    "street": "Marmara Caddesi",
+    "bName": "",
+    "bNo": "12"
+  },
+  {
+    "name": "Pınarkule İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Adnan Kahveci Mah.",
+    "street": "Yavuz Sultan Selim Bulvarı",
+    "bName": "",
+    "bNo": "8"
+  },
+  {
+    "name": "TOKİ Mehmet Akif Ersoy İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Adnan Kahveci Mah.",
+    "street": "Anadolu Caddesi",
+    "bName": "",
+    "bNo": "2"
+  },
+  {
+    "name": "Yakuplu 125. Yıl İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Fatih Sultan Mehmet Caddesi",
+    "bName": "",
+    "bNo": "15"
+  },
+  {
+    "name": "Yakuplu İlkokulu",
+    "level": "İlkokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Haramidere Caddesi",
+    "bName": "",
+    "bNo": "8"
+  },
+  {
+    "name": "Beylikdüzü İMKB Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Barış Mah.",
+    "street": "Belediye Caddesi",
+    "bName": "",
+    "bNo": "10"
+  },
+  {
+    "name": "Beylikdüzü Koç Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Büyükşehir Mah.",
+    "street": "Beylikdüzü Caddesi",
+    "bName": "",
+    "bNo": "16"
+  },
+  {
+    "name": "Beylikdüzü Kavaklı Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Kavaklı Mah.",
+    "street": "Yeşilyurt Caddesi",
+    "bName": "",
+    "bNo": "5"
+  },
+  {
+    "name": "Cevat Güleç Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Adnan Kahveci Mah.",
+    "street": "Kafkas Caddesi",
+    "bName": "",
+    "bNo": "12"
+  },
+  {
+    "name": "Dr. Ayla Savaş Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Barış Mah.",
+    "street": "Ali Çebi Caddesi",
+    "bName": "",
+    "bNo": "4"
+  },
+  {
+    "name": "Gürpınar 75. Yıl Cumhuriyet Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Gürpınar Mah.",
+    "street": "İnönü Caddesi",
+    "bName": "",
+    "bNo": "20"
+  },
+  {
+    "name": "Gürpınar Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Dereağzı Mah.",
+    "street": "Serinpınar Caddesi",
+    "bName": "",
+    "bNo": "7"
+  },
+  {
+    "name": "Neşe Sever Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Marmara Mah.",
+    "street": "Hürriyet Bulvarı",
+    "bName": "",
+    "bNo": "26"
+  },
+  {
+    "name": "Pınarkule Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Adnan Kahveci Mah.",
+    "street": "Avrupa Caddesi",
+    "bName": "",
+    "bNo": "14"
+  },
+  {
+    "name": "Sevim Çuhadaroğlu Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Kervansaray Caddesi",
+    "bName": "",
+    "bNo": "3"
+  },
+  {
+    "name": "Şehit Büyükelçi Galip Balkar Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Hürriyet Bulvarı",
+    "bName": "",
+    "bNo": "32"
+  },
+  {
+    "name": "Yakuplu Kemal Arıkan Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Marmara Mah.",
+    "street": "Yurt Caddesi",
+    "bName": "",
+    "bNo": "8"
+  },
+  {
+    "name": "Yakuplu Ortaokulu",
+    "level": "Ortaokul",
+    "neigh": "Yakuplu Mah.",
+    "street": "Fatih Sultan Mehmet Caddesi",
+    "bName": "",
+    "bNo": "18"
+  },
+  {
+    "name": "BİAŞ Nasrettin Hoca Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Barış Mah.",
+    "street": "Koşuyolu Caddesi",
+    "bName": "",
+    "bNo": "2"
+  },
+  {
+    "name": "BİAŞ Yeşilkent Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Gürpınar Mah.",
+    "street": "Millet Caddesi",
+    "bName": "",
+    "bNo": "16"
+  },
+  {
+    "name": "Kavaklı Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Kavaklı Mah.",
+    "street": "Kavaklı Caddesi",
+    "bName": "",
+    "bNo": "4"
+  },
+  {
+    "name": "Marmara Evleri Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Marmara Mah.",
+    "street": "İhlas Caddesi",
+    "bName": "",
+    "bNo": "10"
+  },
+  {
+    "name": "TOKİ Mehmet Akif Ersoy Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Adnan Kahveci Mah.",
+    "street": "Anadolu Caddesi",
+    "bName": "",
+    "bNo": "4"
+  },
+  {
+    "name": "Yakuplu Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Yakuplu Mah.",
+    "street": "Hürriyet Bulvarı",
+    "bName": "",
+    "bNo": "12"
+  },
+  {
+    "name": "Büyükşehir İlkokulu Anaokulu",
+    "level": "Okul Öncesi",
+    "neigh": "Büyükşehir Mah.",
+    "street": "Atatürk Bulvarı",
+    "bName": "",
+    "bNo": "3"
+  }
+];
+
+    function populateSchoolsDatalist() {
+      const dl = document.getElementById('beylikduzuSchoolsList');
+      if (!dl) return;
+      dl.innerHTML = '';
+      BEYLIKDUZU_SCHOOLS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.name;
+        opt.innerText = s.name + ' (' + s.neigh + ')';
+        dl.appendChild(opt);
+      });
+    }
+
+    // Okul adı yazıldığında veya listeden seçildiğinde otomatik adres doldurma
+    function onSchoolNameInput(val) {
+      if (!val) return;
+      const match = BEYLIKDUZU_SCHOOLS.find(s => s.name.toLowerCase() === val.trim().toLowerCase());
+      if (match) {
+        fillSchoolFormFields('newSchoolLevel', 'newClassType', 'schoolNeighborhood', 'schoolStreet', 'schoolBuildingName', 'schoolBuildingNo', match);
+      }
+    }
+
+    function onEditSchoolNameInput(val) {
+      if (!val) return;
+      const match = BEYLIKDUZU_SCHOOLS.find(s => s.name.toLowerCase() === val.trim().toLowerCase());
+      if (match) {
+        fillSchoolFormFields('editSchoolLevel', 'editClassType', 'editSchoolNeighborhood', 'editSchoolStreet', 'editSchoolBuildingName', 'editSchoolBuildingNo', match);
+      }
+    }
+
+    function fillSchoolFormFields(levelId, classTypeId, neighId, streetId, bNameId, bNoId, schoolData) {
+      // Kademe seçimi
+      const lvlEl = document.getElementById(levelId);
+      if (lvlEl) {
+        lvlEl.value = schoolData.level;
+        updateClassTypesByLevel(levelId, classTypeId);
+      }
+
+      // Mahalle seçimi
+      const neighEl = document.getElementById(neighId);
+      if (neighEl && schoolData.neigh) {
+        neighEl.value = schoolData.neigh;
+        updateStreetSelect(neighId, streetId);
+      }
+
+      // Cadde seçimi
+      const streetEl = document.getElementById(streetId);
+      const customStreetEl = document.getElementById(streetId + 'Custom');
+      if (streetEl && schoolData.street) {
+        const optExists = Array.from(streetEl.options).some(o => o.value === schoolData.street);
+        if (optExists) {
+          streetEl.value = schoolData.street;
+          if (customStreetEl) customStreetEl.style.display = 'none';
+        } else {
+          streetEl.value = 'Diğer Cadde/Sokak';
+          if (customStreetEl) {
+            customStreetEl.style.display = 'block';
+            customStreetEl.value = schoolData.street;
+          }
+        }
+      }
+
+      // Bina adı & Kapı No
+      const bNameEl = document.getElementById(bNameId);
+      if (bNameEl) bNameEl.value = schoolData.bName || '';
+      const bNoEl = document.getElementById(bNoId);
+      if (bNoEl) bNoEl.value = schoolData.bNo || '';
+    }
+
+    // Listede olmayan okullar için Harita / Web Arama Servisi (Geocoding)
+    async function fetchAddressFromMap(nameId, levelId, classTypeId, neighId, streetId, bNameId, bNoId) {
+      const nameInput = document.getElementById(nameId);
+      const schoolName = nameInput ? nameInput.value.trim() : '';
+
+      if (!schoolName) {
+        alert('Lütfen önce aratmak istediğiniz okulun adını yazınız.');
+        return;
+      }
+
+      // 1. Önce yerel veritabanında ara
+      const localMatch = BEYLIKDUZU_SCHOOLS.find(s => s.name.toLowerCase().includes(schoolName.toLowerCase()));
+      if (localMatch) {
+        nameInput.value = localMatch.name;
+        fillSchoolFormFields(levelId, classTypeId, neighId, streetId, bNameId, bNoId, localMatch);
+        alert('✅ "' + localMatch.name + '" resmi rehberde bulundu ve adresi otomatik getirildi!');
+        return;
+      }
+
+      // 2. Harita Geocoding API ile internette ara
+      try {
+        const query = encodeURIComponent(schoolName + ' Beylikdüzü İstanbul');
+        const url = 'https://nominatim.openstreetmap.org/search?q=' + query + '&format=json&addressdetails=1&limit=1';
+        
+        nameInput.placeholder = 'Adres aranıyor...';
+        const response = await fetch(url, { headers: { 'Accept-Language': 'tr' } });
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const addr = data[0].address || {};
+          const foundNeigh = addr.suburb || addr.neighbourhood || '';
+          const foundRoad = addr.road || addr.street || '';
+          const foundNo = addr.house_number || '';
+
+          // Mahalleyi eşleştir
+          const neighEl = document.getElementById(neighId);
+          if (neighEl && foundNeigh) {
+            const cleanN = foundNeigh.toLowerCase().replace('mahallesi', '').replace('mah.', '').trim();
+            const matchN = Object.keys(BEYLIKDUZU_DATA).find(n => n.toLowerCase().includes(cleanN));
+            if (matchN) {
+              neighEl.value = matchN;
+              updateStreetSelect(neighId, streetId);
+            }
+          }
+
+          // Caddeyi eşleştir
+          const streetEl = document.getElementById(streetId);
+          const customStreetEl = document.getElementById(streetId + 'Custom');
+          if (streetEl && foundRoad) {
+            const optExists = Array.from(streetEl.options).some(o => o.value.toLowerCase().includes(foundRoad.toLowerCase()));
+            if (optExists) {
+              streetEl.value = Array.from(streetEl.options).find(o => o.value.toLowerCase().includes(foundRoad.toLowerCase())).value;
+              if (customStreetEl) customStreetEl.style.display = 'none';
+            } else {
+              streetEl.value = 'Diğer Cadde/Sokak';
+              if (customStreetEl) {
+                customStreetEl.style.display = 'block';
+                customStreetEl.value = foundRoad;
+              }
+            }
+          }
+
+          if (foundNo) {
+            const bNoEl = document.getElementById(bNoId);
+            if (bNoEl) bNoEl.value = foundNo;
+          }
+
+          alert('✅ Adres harita servisinden başarıyla çekildi!\n\nMahalle: ' + (neighEl ? neighEl.value : '') + '\nCadde/Sokak: ' + (foundRoad || 'Belirlenemedi') + '\nKapı No: ' + (foundNo || 'Belirlenemedi'));
+        } else {
+          alert('Harita servisinde bu isimle tam eşleşen bir okul bulunamadı. Lütfen okul adını kontrol edip mahalle ve caddeyi listeden seçiniz.');
+        }
+      } catch (err) {
+        console.warn('Harita arama hatası:', err);
+        alert('Harita servisine bağlanırken bir sorun oluştu. Lütfen listeden seçerek devam ediniz.');
+      } finally {
+        nameInput.placeholder = 'Okul adını yazın veya listeden seçin...';
+      }
+    }
+
+    // VERİ YÖNETİMİ (TÜM GEÇMİŞ VERSİYONLARDAN OTOMATİK KURTARMA & YÜKLEME)
+    function loadSavedClasses() {
+      const keys = ['special_edu_classes_v3', 'special_edu_classes_v2', 'special_edu_classes', 'special_edu_classes_backup'];
+      let foundData = [];
+      for (let k of keys) {
+        try {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              foundData = parsed;
+              break;
+            }
+          }
+        } catch(e){}
+      }
+      // Eksik alanları tamamla ve kapasiteleri garantiye al
+      return foundData.map(item => {
+        let cap = item.maxCapacity;
+        if (!cap) {
+          if (item.type === 'Özel Eğitim Anasınıfı' || item.level === 'Okul Öncesi') cap = 5;
+          else if (item.type === 'Hafif Düzey-Otizm') cap = 4;
+          else cap = 10;
+        }
+        return {
+          id: item.id || Date.now() + Math.random(),
+          school: item.school || 'İsimsiz Okul',
+          level: item.level || (item.type === 'Özel Eğitim Anasınıfı' ? 'Okul Öncesi' : 'İlkokul'),
+          type: item.type || 'Hafif Düzey-Zihinsel',
+          neighborhood: item.neighborhood || '',
+          street: item.street || '',
+          buildingName: item.buildingName || '',
+          buildingNo: item.buildingNo || '',
+          branch: item.branch || 'A Şubesi',
+          maxCapacity: cap,
+          currentStudents: Number(item.currentStudents) || 0
+        };
+      });
+    }
+
+    let classes = loadSavedClasses();
 
     // KADEME SEÇİMİNE GÖRE SINIF TÜRÜ VE KAPASİTE YÖNETİMİ
     function updateClassTypesByLevel(levelId, classTypeId, selectedType) {
@@ -1141,8 +1612,54 @@
 
     const CAPACITIES = { 'Hafif Düzey-Zihinsel': 10, 'Hafif Düzey-Otizm': 4, 'Özel Eğitim Anasınıfı': 5 };
 
+
+    // VERİ YEDEKLEME VE TELEFON / BİLGİSAYAR ARASI AKTARIM
+    function exportDataBackup() {
+      if (classes.length === 0) {
+        alert('Henüz kayıtlı bir okul veya sınıf verisi bulunmuyor.');
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(classes, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "Beylikduzu_Ozel_Egitim_Kontenjan_Yedek.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      alert('Tüm okul ve sınıf verileriniz dosya olarak indirildi! Bu dosyayı telefonunuza atıp "Yedek Yükle" diyerek anında telefona da aktarabilirsiniz.');
+    }
+
+    function importDataBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            classes = imported;
+            saveData();
+            alert(`Tebrikler! ${classes.length} adet okul/sınıf kaydı başarıyla sisteme yüklendi.`);
+          } else {
+            alert('Geçersiz yedek dosyası formatı!');
+          }
+        } catch(err) {
+          alert('Dosya okunurken bir hata oluştu: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
     function saveData() {
-      try { localStorage.setItem('special_edu_classes_v3', JSON.stringify(classes)); } catch(e){}
+      try {
+        const jsonStr = JSON.stringify(classes);
+        localStorage.setItem('special_edu_classes_v3', jsonStr);
+        localStorage.setItem('special_edu_classes_v2', jsonStr);
+        localStorage.setItem('special_edu_classes', jsonStr);
+      } catch(e){
+        console.error('Kayıt hatası:', e);
+        alert('Dikkat: Tarayıcı hafızasına kayıt yapılamadı! (Özel/Gizli sekme kullanıyor olabilirsiniz)');
+      }
       renderAllTables();
     }
 
@@ -1164,7 +1681,14 @@
       const count = classes.filter(c => c.school.toLowerCase() === name.toLowerCase() && c.type === type).length;
       const branchLetter = String.fromCharCode(65 + count);
 
-      classes.push({
+      let calcCap = CAPACITIES[type];
+      if (!calcCap) {
+        if (level === 'Okul Öncesi' || type === 'Özel Eğitim Anasınıfı') calcCap = 5;
+        else if (type === 'Hafif Düzey-Otizm') calcCap = 4;
+        else calcCap = 10;
+      }
+
+      const newRecord = {
         id: Date.now(),
         school: name,
         level: level,
@@ -1174,16 +1698,20 @@
         buildingName: buildingName,
         buildingNo: buildingNo,
         branch: branchLetter + ' Şubesi',
-        maxCapacity: CAPACITIES[type],
+        maxCapacity: calcCap,
         currentStudents: 0
-      });
+      };
+
+      classes.push(newRecord);
 
       document.getElementById('newSchoolName').value = '';
       document.getElementById('schoolBuildingName').value = '';
       document.getElementById('schoolBuildingNo').value = '';
       document.getElementById('schoolStreetCustom').value = '';
       document.getElementById('schoolStreetCustom').style.display = 'none';
+      
       saveData();
+      alert(`✅ Başarılı!\n\n"${name}" (${level} - ${branchLetter} Şubesi) sisteme kaydedildi.\nKapasite: ${calcCap} öğrenci.`);
     }
 
     function updateStudent(id, delta) {
