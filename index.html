@@ -101,9 +101,6 @@
       .btn-action { width: 44px; height: 44px; font-size: 1.3rem; }
     }
   </style>
-  <!-- Google Firebase SDK (Canlı Gerçek Zamanlı Eşitleme) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -139,15 +136,10 @@
       </div>
       <div class="header-right">
         <span class="user-tag" id="currentUserName">Giriş yapıldı</span>
-        <span id="firebaseStatusBadge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; padding:5px 12px; border-radius:15px; font-size:0.78rem; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-          <span id="firebaseStatusDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#f59e0b;"></span>
-          <span id="firebaseStatusText">Firebase Bağlanıyor...</span>
-        </span>
-        <button class="btn-pass" style="background:#ffedd5; color:#c2410c; border:1.5px solid #fdba74; font-weight:700;" type="button" onclick="openFirebaseConfigModal()" title="Google Firebase veritabanı ayarlarını yapılandırın">🔥 Firebase Ayarları</button>
-        <button class="btn-pass" style="background:#dcfce7; color:#15803d; border:1.5px solid #86efac; font-weight:700;" type="button" onclick="openPhoneTransferModal()" title="Bilgisayardaki verileri telefonunuza karekod veya bağlantı ile anında aktarır">📱 Karekod / Aktar</button>
-        <button class="btn-pass" style="background:#e0f2fe; color:#0369a1;" type="button" onclick="exportDataBackup()" title="Verileri bilgisayarınıza/telefonunuza dosya olarak yedekler">💾 Yedek Al</button>
+        <button class="btn-pass" style="background:#e0f2fe; color:#0369a1;" type="button" onclick="exportDataBackup()" title="Verileri bilgisayarınıza/telefonunuza dosya olarak yedekler">💾 Veri Yedekle</button>
         <button class="btn-pass" style="background:#fef3c7; color:#92400e;" type="button" onclick="document.getElementById('backupFileInput').click()" title="Yedek dosyasını geri yükler">📂 Yedek Yükle</button>
         <input type="file" id="backupFileInput" style="display:none;" accept=".json" onchange="importDataBackup(event)">
+        <button class="btn-pass" id="cloudStatusBtn" type="button" onclick="openCloudModal()" title="Telefon ve bilgisayar arasında otomatik eşitleme">☁️ Bulut: kapalı</button>
         <button class="btn-pass" type="button" onclick="openPasswordModal()">🔑 Şifre Değiştir</button>
         <button class="btn-logout" type="button" onclick="logout()">Çıkış Yap</button>
       </div>
@@ -439,6 +431,27 @@
       <div class="modal-actions">
         <button class="btn-pass" type="button" onclick="closeEditModal()">İptal</button>
         <button class="btn-primary" style="padding: 6px 14px;" type="button" onclick="saveEditedSchool()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULUT EŞİTLEME MODAL -->
+  <div id="cloudModal" class="modal-backdrop">
+    <div class="modal">
+      <h3 style="margin-bottom: 8px; font-size: 1.1rem;">☁️ Bulut Eşitleme (Telefon ↔ Bilgisayar)</h3>
+      <p style="font-size:0.82rem; color:#475569; margin-bottom:8px;">Firebase konsolundaki <strong>firebaseConfig</strong> bloğunu aşağıya yapıştırın. Her cihazda bir kez yapılır.</p>
+      <div class="form-group">
+        <textarea id="cloudConfigInput" rows="8" placeholder='const firebaseConfig = { apiKey: "...", projectId: "...", appId: "..." };' style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px; font-family:monospace; font-size:0.8rem;"></textarea>
+      </div>
+      <div style="font-size:0.85rem; margin-bottom:10px;">Durum: <strong id="cloudStatusText">Bulut: kapalı</strong></div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+        <button class="btn-pass" type="button" style="background:#e0f2fe; color:#0369a1;" onclick="cloudForceDownload()">⬇️ Buluttakini bu cihaza al</button>
+        <button class="btn-pass" type="button" style="background:#fef3c7; color:#92400e;" onclick="cloudForceUpload()">⬆️ Bu cihazdakini buluta yükle</button>
+        <button class="btn-pass" type="button" style="background:#fee2e2; color:#991b1b;" onclick="removeCloudConfig()">Bağlantıyı kaldır</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-pass" type="button" onclick="closeCloudModal()">Kapat</button>
+        <button class="btn-primary" style="padding: 6px 14px;" type="button" onclick="saveCloudConfig()">Kaydet ve Bağlan</button>
       </div>
     </div>
   </div>
@@ -1046,8 +1059,7 @@
       updateClassTypesByLevel('newSchoolLevel', 'newClassType');
       updateStudentDiagByLevel();
       renderAllTables();
-      initFirebase();
-
+      if (!cloud.started) { cloud.started = true; startCloudSync(); }
     }
 
     function logout() {
@@ -1059,7 +1071,6 @@
     }
 
     window.onload = function() {
-      checkIncomingTransfer();
       try {
         const rKey = localStorage.getItem('saved_user_key') || sessionStorage.getItem('saved_user_key');
         if (rKey) {
@@ -1764,268 +1775,184 @@
       reader.readAsText(file);
     }
 
-
-    // ==========================================
-    // KAREKOD & BAĞLANTI İLE TELEFONA KESİN AKTARIM
-    // ==========================================
-    function generateTransferUrl() {
-      if (!classes || classes.length === 0) return null;
-      const jsonStr = JSON.stringify(classes);
-      const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-      const baseUrl = window.location.origin + window.location.pathname;
-      return baseUrl + '#transfer=' + b64;
-    }
-
-    function openPhoneTransferModal() {
-      if (!classes || classes.length === 0) {
-        alert('Aktarılacak henüz kayıtlı bir okul verisi bulunmuyor. Önce okul ekleyiniz.');
-        return;
-      }
-      const transferUrl = generateTransferUrl();
-      if (!transferUrl) return;
-
-      const qrImg = document.getElementById('qrCodeImg');
-      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(transferUrl);
-      
-      const copyMsg = document.getElementById('copyMsg');
-      if (copyMsg) copyMsg.style.display = 'none';
-
-      document.getElementById('transferModal').style.display = 'flex';
-    }
-
-    function closePhoneTransferModal() {
-      document.getElementById('transferModal').style.display = 'none';
-    }
-
-    function copyTransferLink() {
-      const transferUrl = generateTransferUrl();
-      if (!transferUrl) return;
-
-      navigator.clipboard.writeText(transferUrl).then(() => {
-        const copyMsg = document.getElementById('copyMsg');
-        if (copyMsg) copyMsg.style.display = 'block';
-      }).catch(() => {
-        prompt('Aşağıdaki bağlantıyı kopyalayıp WhatsApp üzerinden telefonunuza gönderin:', transferUrl);
-      });
-    }
-
-    // Telefonda sayfa açıldığında otomatik içe aktarma
-    function checkIncomingTransfer() {
-      try {
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#transfer=')) {
-          const b64 = hash.replace('#transfer=', '');
-          const jsonStr = decodeURIComponent(escape(atob(b64)));
-          const imported = JSON.parse(jsonStr);
-          if (Array.isArray(imported) && imported.length > 0) {
-            classes = imported;
-            saveData();
-            window.location.hash = '';
-            alert('🎉 Harika! Bilgisayardaki ' + classes.length + ' adet okul ve sınıf verisi telefonunuza başarıyla aktarıldı ve kaydedildi!');
-          }
-        }
-      } catch(err) {
-        console.warn('Veri aktarım çözümleme hatası:', err);
-      }
-    }
-
-
-    // ==========================================
-    // GOOGLE FIREBASE REALTIME DATABASE MOTORU
-    // ==========================================
-    let firebaseApp = null;
-    let firebaseDb = null;
-    let firebaseDbRef = null;
-
-    function updateFirebaseStatusBadge(status, text) {
-      const badge = document.getElementById('firebaseStatusBadge');
-      const dot = document.getElementById('firebaseStatusDot');
-      const label = document.getElementById('firebaseStatusText');
-      if (!badge || !dot || !label) return;
-
-      if (status === 'connected') {
-        badge.style.background = '#dcfce7';
-        badge.style.color = '#15803d';
-        badge.style.borderColor = '#86efac';
-        dot.style.background = '#16a34a';
-        label.innerText = text || 'Firebase Canlı Bağlı';
-      } else if (status === 'connecting') {
-        badge.style.background = '#e0f2fe';
-        badge.style.color = '#0369a1';
-        badge.style.borderColor = '#bae6fd';
-        dot.style.background = '#0284c7';
-        label.innerText = text || 'Firebase Bağlanıyor...';
-      } else if (status === 'unconfigured') {
-        badge.style.background = '#fef3c7';
-        badge.style.color = '#92400e';
-        badge.style.borderColor = '#fde68a';
-        dot.style.background = '#f59e0b';
-        label.innerText = text || 'Firebase Ayarlanmadı';
-      } else {
-        badge.style.background = '#fee2e2';
-        badge.style.color = '#b91c1c';
-        badge.style.borderColor = '#fecaca';
-        dot.style.background = '#dc2626';
-        label.innerText = text || 'Firebase Çevrimdışı';
-      }
-    }
-
-    function initFirebase() {
-      const savedConfigStr = localStorage.getItem('firebase_custom_config');
-      if (!savedConfigStr) {
-        updateFirebaseStatusBadge('unconfigured', 'Firebase Ayarı Bekleniyor');
-        return;
-      }
-
-      try {
-        const config = JSON.parse(savedConfigStr);
-        if (!config || (!config.databaseURL && !config.projectId)) {
-          updateFirebaseStatusBadge('unconfigured', 'Geçersiz Firebase Ayarı');
-          return;
-        }
-
-        updateFirebaseStatusBadge('connecting', 'Firebase Bağlanıyor...');
-
-        if (!firebase.apps.length) {
-          firebaseApp = firebase.initializeApp(config);
-        } else {
-          firebaseApp = firebase.app();
-        }
-
-        firebaseDb = firebase.database();
-        firebaseDbRef = firebaseDb.ref('beylikduzu_ozel_egitim_kontenjan');
-
-        // Canlı Bağlantı Durumu Takibi
-        firebaseDb.ref('.info/connected').on('value', (snap) => {
-          if (snap.val() === true) {
-            updateFirebaseStatusBadge('connected', 'Canlı Bulut Eşitlendi');
-          } else {
-            updateFirebaseStatusBadge('offline', 'Firebase Çevrimdışı');
-          }
-        });
-
-        // ÇİFT TARAFLI GERÇEK ZAMANLI VERİ DİNLEME (PC & TELEFON CANLI SENKRONİZASYON)
-        firebaseDbRef.on('value', (snapshot) => {
-          const val = snapshot.val();
-          if (val && Array.isArray(val)) {
-            classes = val;
-            try {
-              localStorage.setItem('special_edu_classes_v3', JSON.stringify(classes));
-            } catch(e){}
-            renderAllTables();
-            updateFirebaseStatusBadge('connected', 'Canlı Eşitlendi (' + classes.length + ' Sınıf)');
-          } else if (val === null && classes.length > 0) {
-            // Firebase henüz boşsa, yerel verileri Firebase'e yükle
-            firebaseDbRef.set(classes);
-          }
-        });
-
-      } catch (err) {
-        console.error('Firebase başlatma hatası:', err);
-        updateFirebaseStatusBadge('offline', 'Firebase Hatası');
-      }
-    }
-
-    function openFirebaseConfigModal() {
-      const saved = localStorage.getItem('firebase_custom_config');
-      if (saved) {
-        try {
-          document.getElementById('firebaseConfigInput').value = JSON.stringify(JSON.parse(saved), null, 2);
-        } catch(e){
-          document.getElementById('firebaseConfigInput').value = saved;
-        }
-      }
-      const msg = document.getElementById('firebaseMsg');
-      if (msg) msg.style.display = 'none';
-      document.getElementById('firebaseModal').style.display = 'flex';
-    }
-
-    function closeFirebaseConfigModal() {
-      document.getElementById('firebaseModal').style.display = 'none';
-    }
-
-    function saveFirebaseConfig() {
-      let raw = document.getElementById('firebaseConfigInput').value.trim();
-      const msg = document.getElementById('firebaseMsg');
-
-      if (!raw) {
-        msg.style.color = '#dc2626';
-        msg.innerText = 'Lütfen Firebase yapılandırma kodunu giriniz!';
-        msg.style.display = 'block';
-        return;
-      }
-
-      // Kullanıcı JS objesi olarak yapıştırdıysa (const firebaseConfig = { ... };) temizle
-      if (raw.includes('firebaseConfig =')) {
-        raw = raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
-      } else if (!raw.startsWith('{') && raw.includes('{')) {
-        raw = raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
-      }
-
-      // JSON uyumluluğu için tırnaksız key'leri düzelt
-      let parsedConfig = null;
-      try {
-        parsedConfig = JSON.parse(raw);
-      } catch (e) {
-        try {
-          // JS Object formatını JSON'a dönüştür
-          const cleanObjStr = raw
-            .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
-            .replace(/'/g, '"')
-            .replace(/,\s*}/g, '}');
-          parsedConfig = JSON.parse(cleanObjStr);
-        } catch(e2) {
-          msg.style.color = '#dc2626';
-          msg.innerText = 'Yapılandırma kodu geçerli bir JSON veya obje formatında değil. Lütfen kontrol ediniz.';
-          msg.style.display = 'block';
-          return;
-        }
-      }
-
-      if (!parsedConfig.databaseURL && !parsedConfig.projectId) {
-        msg.style.color = '#dc2626';
-        msg.innerText = 'Hata: databaseURL veya projectId bulunamadı! Realtime Database oluşturduğunuzdan emin olun.';
-        msg.style.display = 'block';
-        return;
-      }
-
-      // Eğer databaseURL verilmemişse ama projectId varsa otomatik oluştur
-      if (!parsedConfig.databaseURL && parsedConfig.projectId) {
-        parsedConfig.databaseURL = `https://${parsedConfig.projectId}-default-rtdb.firebaseio.com`;
-      }
-
-      localStorage.setItem('firebase_custom_config', JSON.stringify(parsedConfig));
-
-      msg.style.color = '#16a34a';
-      msg.innerText = '✅ Firebase ayarları başarıyla kaydedildi! Bağlantı kuruluyor...';
-      msg.style.display = 'block';
-
-      setTimeout(() => {
-        closeFirebaseConfigModal();
-        initFirebase();
-      }, 1000);
-    }
-
-    function saveData() {
+    function persistLocal() {
       try {
         const jsonStr = JSON.stringify(classes);
         localStorage.setItem('special_edu_classes_v3', jsonStr);
         localStorage.setItem('special_edu_classes_v2', jsonStr);
         localStorage.setItem('special_edu_classes', jsonStr);
+        return true;
       } catch(e){
         console.error('Kayıt hatası:', e);
+        alert('Dikkat: Tarayıcı hafızasına kayıt yapılamadı! (Özel/Gizli sekme kullanıyor olabilirsiniz)');
+        return false;
       }
+    }
+
+    function saveData() {
+      setLocalStamp(Date.now());
+      persistLocal();
+      pushToCloud();
       refreshSchoolDatalist();
       renderAllTables();
+    }
 
-      // CANLI FIREBASE GÜNCELLEMESİ (Otomatik PC ve Telefon Eşitleme)
-      if (firebaseDbRef) {
-        try {
-          firebaseDbRef.set(classes);
-        } catch(err) {
-          console.warn('Firebase güncelleme hatası:', err);
-        }
+    // ===================== BULUT EŞİTLEME (Firebase Firestore) =====================
+    // Telefon ve bilgisayar aynı veriyi görsün diye veriler tek bir belgede tutulur.
+    // Yapılandırmayı doğrudan buraya yapıştırabilirsiniz (telefonda ayrıca girmeye gerek kalmaz):
+    //   const FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
+    const FIREBASE_CONFIG = null;
+    const FB_SDK = [
+      'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
+    ];
+    const cloud = { ref: null, unsub: null, started: false, pushTimer: null };
+
+    function getLocalStamp() { return Number(localStorage.getItem('special_edu_updated_at') || 0); }
+    function setLocalStamp(t) { try { localStorage.setItem('special_edu_updated_at', String(t)); } catch(e){} }
+
+    function setCloudStatus(state, msg) {
+      const colors = { off: ['#f1f5f9', '#475569'], wait: ['#fef9c3', '#854d0e'], ok: ['#dcfce7', '#166534'], err: ['#fee2e2', '#991b1b'] };
+      const el = document.getElementById('cloudStatusBtn');
+      if (el) { el.innerText = '☁️ ' + msg; el.style.background = colors[state][0]; el.style.color = colors[state][1]; }
+      const m = document.getElementById('cloudStatusText');
+      if (m) m.innerText = msg;
+    }
+
+    function getFirebaseConfig() {
+      if (FIREBASE_CONFIG) return FIREBASE_CONFIG;
+      try { return JSON.parse(localStorage.getItem('fb_config') || 'null'); } catch(e) { return null; }
+    }
+
+    function loadScriptOnce(src) {
+      return new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = src; sc.onload = resolve;
+        sc.onerror = () => reject(new Error('Firebase dosyası yüklenemedi (internet bağlantısını kontrol edin)'));
+        document.head.appendChild(sc);
+      });
+    }
+
+    async function startCloudSync() {
+      const cfg = getFirebaseConfig();
+      if (!cfg || !cfg.projectId) { setCloudStatus('off', 'Bulut: kapalı'); return; }
+      try {
+        setCloudStatus('wait', 'Bulut: bağlanıyor…');
+        if (!window.firebase) { for (const u of FB_SDK) await loadScriptOnce(u); }
+        if (!firebase.apps.length) firebase.initializeApp(cfg);
+        cloud.ref = firebase.firestore().collection('kontenjan').doc('main');
+        if (cloud.unsub) cloud.unsub();
+        cloud.unsub = cloud.ref.onSnapshot(onCloudSnapshot, err => {
+          console.warn('Bulut hatası:', err);
+          setCloudStatus('err', 'Bulut hatası: ' + (err.code === 'permission-denied' ? 'izin yok (kuralları kontrol edin)' : (err.code || err.message)));
+        });
+      } catch (e) {
+        console.warn(e);
+        setCloudStatus('err', 'Bulut hatası: ' + e.message);
       }
+    }
+
+    function applyRemote(d) {
+      let remote;
+      try { remote = JSON.parse(d.json); } catch(e) { return false; }
+      if (!Array.isArray(remote)) return false;
+      // Bu cihazda hiç eşitlenmemiş veri varsa üzerine yazmadan önce yedeğini al
+      if (classes.length > 0 && getLocalStamp() === 0) {
+        try { localStorage.setItem('special_edu_classes_before_cloud', JSON.stringify(classes)); } catch(e){}
+      }
+      try {
+        const j = JSON.stringify(remote);
+        localStorage.setItem('special_edu_classes_v3', j);
+        localStorage.setItem('special_edu_classes_v2', j);
+        localStorage.setItem('special_edu_classes', j);
+      } catch(e){}
+      classes = loadSavedClasses();
+      setLocalStamp(Number(d.updatedAt) || Date.now());
+      refreshSchoolDatalist();
+      renderAllTables();
+      return true;
+    }
+
+    function onCloudSnapshot(snap) {
+      if (snap.metadata.hasPendingWrites) return; // kendi yazdığımız, tekrar işleme
+      setCloudStatus('ok', 'Bulut: eşitlendi');
+      if (!snap.exists) {
+        if (classes.length > 0) pushToCloud();      // ilk cihaz: mevcut veriyi buluta yükle
+        return;
+      }
+      const d = snap.data();
+      const rStamp = Number(d.updatedAt) || 0;
+      const lStamp = getLocalStamp();
+      if (rStamp > lStamp) applyRemote(d);          // bulut daha yeni → bu cihaza al
+      else if (lStamp > rStamp) pushToCloud();      // bu cihaz daha yeni → buluta gönder
+    }
+
+    function pushToCloud() {
+      if (!cloud.ref) return;
+      clearTimeout(cloud.pushTimer);
+      cloud.pushTimer = setTimeout(async () => {
+        try {
+          let t = getLocalStamp();
+          if (!t) { t = Date.now(); setLocalStamp(t); }
+          setCloudStatus('wait', 'Bulut: kaydediliyor…');
+          await cloud.ref.set({ json: JSON.stringify(classes), updatedAt: t, device: (navigator.userAgent || '').slice(0, 80) });
+          setCloudStatus('ok', 'Bulut: kaydedildi');
+        } catch (e) {
+          console.warn(e);
+          setCloudStatus('err', 'Bulut kaydedilemedi: ' + (e.code || e.message));
+        }
+      }, 400);
+    }
+
+    async function cloudForceDownload() {
+      if (!cloud.ref) return alert('Önce bulut bağlantısını kaydedin.');
+      if (!confirm('Bu cihazdaki veriler silinip buluttaki verilerle değiştirilecek. Devam edilsin mi?')) return;
+      try {
+        const snap = await cloud.ref.get({ source: 'server' });
+        if (!snap.exists) return alert('Bulutta henüz veri yok.');
+        setLocalStamp(0);
+        if (applyRemote(snap.data())) alert('✅ Buluttaki veriler bu cihaza alındı.');
+      } catch (e) { alert('İndirilemedi: ' + (e.code || e.message)); }
+    }
+
+    function cloudForceUpload() {
+      if (!cloud.ref) return alert('Önce bulut bağlantısını kaydedin.');
+      if (!confirm('Buluttaki veriler silinip bu cihazdaki verilerle değiştirilecek. Devam edilsin mi?')) return;
+      setLocalStamp(Date.now());
+      pushToCloud();
+      alert('✅ Bu cihazdaki veriler buluta gönderiliyor.');
+    }
+
+    function openCloudModal() {
+      const cfg = getFirebaseConfig();
+      document.getElementById('cloudConfigInput').value = (cfg && !FIREBASE_CONFIG) ? JSON.stringify(cfg, null, 2) : '';
+      document.getElementById('cloudModal').style.display = 'flex';
+    }
+    function closeCloudModal() { document.getElementById('cloudModal').style.display = 'none'; }
+
+    function parseFirebaseConfig(text) {
+      const cfg = {};
+      const re = /([A-Za-z_]+)\s*["']?\s*:\s*["']([^"']+)["']/g;
+      let m;
+      while ((m = re.exec(text)) !== null) cfg[m[1]] = m[2];
+      return cfg;
+    }
+
+    function saveCloudConfig() {
+      const cfg = parseFirebaseConfig(document.getElementById('cloudConfigInput').value);
+      if (!cfg.apiKey || !cfg.projectId) {
+        return alert('apiKey ve projectId bulunamadı. Firebase\'in verdiği "firebaseConfig" bloğunu olduğu gibi yapıştırın.');
+      }
+      try { localStorage.setItem('fb_config', JSON.stringify(cfg)); } catch(e){}
+      closeCloudModal();
+      alert('Bağlantı kaydedildi. Sayfa yenileniyor…');
+      location.reload();
+    }
+
+    function removeCloudConfig() {
+      if (!confirm('Bu cihazdaki bulut bağlantısı kaldırılsın mı? (Veriler silinmez)')) return;
+      try { localStorage.removeItem('fb_config'); } catch(e){}
+      location.reload();
     }
 
     function addClass() {
@@ -2412,64 +2339,5 @@
       });
     }
   </script>
-  <!-- TELEFONA AKTAR / KAREKOD MODAL -->
-  <div id="transferModal" class="modal-backdrop">
-    <div class="modal" style="max-width: 420px; text-align: center;">
-      <h3 style="margin-bottom: 8px; font-size: 1.15rem; color: #1e3a8a;">📱 Telefona Aktar</h3>
-      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">Bilgisayarda girdiğiniz verileri telefonunuza 1 saniyede aktarın.</p>
-      
-      <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-        <img id="qrCodeImg" alt="Karekod" style="width: 200px; height: 200px; margin: 0 auto; display: block; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <div style="font-size: 0.8rem; color: #475569; margin-top: 8px; font-weight: 600;">📷 Telefonunuzun kamerasını bu karekoda tutun</div>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <button type="button" onclick="copyTransferLink()" style="background: #2563eb; color: #ffffff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; width: 100%; cursor: pointer;">
-          📋 WhatsApp Paylaşım Bağlantısını Kopyala
-        </button>
-        <div id="copyMsg" style="font-size: 0.8rem; color: #16a34a; font-weight: 700; margin-top: 6px; display: none;">✅ Bağlantı kopyalandı! Kendinize WhatsApp'tan atıp telefonda açın.</div>
-      </div>
-
-      <div class="modal-actions" style="justify-content: center;">
-        <button class="btn-pass" type="button" onclick="closePhoneTransferModal()" style="padding: 8px 24px;">Kapat</button>
-      </div>
-    </div>
-  </div>
-  <!-- GOOGLE FIREBASE AYARLARI MODAL -->
-  <div id="firebaseModal" class="modal-backdrop">
-    <div class="modal" style="max-width: 500px; text-align: left;">
-      <h3 style="margin-bottom: 8px; font-size: 1.2rem; color: #c2410c; display: flex; align-items: center; gap: 8px;">
-        🔥 Google Firebase Canlı Eşitleme
-      </h3>
-      <p style="font-size: 0.84rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;">
-        Bilgisayar ve telefonunuzun <strong>aynı anda canlı senkronize olması</strong> için Firebase Realtime Database bilgilerinizi buraya bir kez yapıştırmanız yeterlidir.
-      </p>
-
-      <div class="form-group" style="margin-bottom: 12px;">
-        <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Firebase Yapılandırma Kodu (Config Objesi veya JSON)</label>
-        <textarea id="firebaseConfigInput" rows="7" placeholder='Firebase konsolundan aldığınız firebaseConfig kodunu buraya yapıştırın. Örnek:
-{
-  "apiKey": "AIzaSy...",
-  "authDomain": "proje-adi.firebaseapp.com",
-  "databaseURL": "https://proje-adi-default-rtdb.europe-west1.firebasedatabase.app",
-  "projectId": "proje-adi"
-}' style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; font-size: 0.82rem; outline: none;"></textarea>
-      </div>
-
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.78rem; color: #475569; margin-bottom: 14px; line-height: 1.4;">
-        💡 <strong>Nasıl Alınır?</strong><br>
-        1. <a href="https://console.firebase.google.com" target="_blank" style="color: #2563eb; font-weight: 700;">console.firebase.google.com</a> adresinde ücretsiz bir proje açın.<br>
-        2. Sol menüden <strong>Realtime Database</strong> oluşturup kuralları okuma/yazmaya açın.<br>
-        3. Proje Ayarları > Web Uygulaması altındaki <code>firebaseConfig</code> kodunu kopyalayıp buraya yapıştırın.
-      </div>
-
-      <div id="firebaseMsg" style="font-size: 0.82rem; margin-bottom: 10px; display: none;"></div>
-
-      <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn-pass" type="button" onclick="closeFirebaseConfigModal()">Kapat</button>
-        <button class="btn-primary" style="background: #ea580c; padding: 8px 18px;" type="button" onclick="saveFirebaseConfig()">Kaydet ve Bağlan</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
