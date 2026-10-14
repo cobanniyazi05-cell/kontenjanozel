@@ -1024,7 +1024,23 @@
       return DEFAULT_USERS;
     }
 
-    let activeLoggedUser = null;
+    let activeLoggedUser = // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBgVpd8V3HZIG9DJ5rz3UV4Koz_5cQwsB4",
+  authDomain: "kontenjanozel.firebaseapp.com",
+  projectId: "kontenjanozel",
+  storageBucket: "kontenjanozel.firebasestorage.app",
+  messagingSenderId: "301035019224",
+  appId: "1:301035019224:web:7c3bc1b025fa709efb70ad"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);;
 
     function attemptLogin() {
       const u = document.getElementById('username').value.trim().toLowerCase();
